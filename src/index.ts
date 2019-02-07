@@ -1,3 +1,5 @@
+import { cloneDeep } from "lodash"
+
 export type NumberBound =
   | { readonly type: "inclusive" | "exclusive"; readonly value: number }
   | { readonly type: "infinity" }
@@ -5,6 +7,86 @@ export type NumberBound =
 export interface NumberInterval {
   readonly bottom: NumberBound
   readonly upper: NumberBound
+}
+
+// Min is only affecting positive infinity
+const min = function(a: NumberBound, b: NumberBound): NumberBound {
+  if (a.type === "infinity") {
+    return b
+  }
+
+  if (b.type === "infinity") {
+    return a
+  }
+
+  if (a.value === b.value) {
+    return {
+      type:
+        a.type == "exclusive" || b.type == "exclusive"
+          ? "exclusive"
+          : "inclusive",
+      value: a.value
+    }
+  }
+
+  if (a.value < b.value) {
+    return a
+  } else {
+    return b
+  }
+}
+
+// Max is only affecting negative infinity
+const max = function(a: NumberBound, b: NumberBound): NumberBound {
+  if (a.type === "infinity") {
+    return b
+  }
+
+  if (b.type === "infinity") {
+    return a
+  }
+
+  if (a.value === b.value) {
+    return {
+      type:
+        a.type == "exclusive" && b.type == "exclusive"
+          ? "exclusive"
+          : "inclusive",
+      value: a.value
+    }
+  }
+
+  if (a.value > b.value) {
+    return a
+  } else {
+    return b
+  }
+}
+
+export class NumberInterval {
+  constructor(
+    public readonly bottom: NumberBound,
+    public readonly upper: NumberBound
+  ) {}
+
+  public get isUniversal(): boolean {
+    return this.negativeInf && this.positiveInf
+  }
+
+  public get negativeInf(): boolean {
+    return this.bottom.type === "infinity"
+  }
+
+  public get positiveInf(): boolean {
+    return this.upper.type === "infinity"
+  }
+
+  public intersection(interval: NumberInterval): NumberInterval {
+    let a = max(this.bottom, interval.bottom),
+      b = min(this.upper, interval.upper)
+
+    return new NumberInterval(a, b)
+  }
 }
 
 export type NumberSet = NumberInterval[]
@@ -23,3 +105,14 @@ export const displayNumberInterval = function({
 export const displayNumberBound = function(numberSet: NumberSet): string {
   return numberSet.map(displayNumberInterval).join(" ∪ ")
 }
+
+export const mergeNumberBound = function(
+  a: NumberSet,
+  b: NumberSet
+): NumberSet {
+  let c: NumberSet = cloneDeep(a)
+
+  return c
+}
+
+// d a b = (a / b) + (b / a) => a ∈ (-∞, +∞)
