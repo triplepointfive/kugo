@@ -1,16 +1,25 @@
-export interface Bound {
-  bottom: number | "infinity"
-  upper: number | "infinity"
+export type NumberBound =
+  | { readonly type: "inclusive" | "exclusive"; readonly value: number }
+  | { readonly type: "infinity" }
+
+export interface NumberInterval {
+  readonly bottom: NumberBound
+  readonly upper: NumberBound
 }
 
-export type NumberBound = Bound[]
+export type NumberSet = NumberInterval[]
 
-export const displayBound = function({ bottom, upper }: Bound): string {
-  return `${bottom === "infinity" ? "-∞" : bottom}, ${
-    upper === "infinity" ? "+∞" : upper
+export const displayNumberInterval = function({
+  bottom,
+  upper
+}: NumberInterval): string {
+  return `${bottom.type === "inclusive" ? "[" : "("}${
+    bottom.type === "infinity" ? "-∞" : bottom.value
+  }, ${upper.type === "infinity" ? "+∞" : upper.value}${
+    upper.type === "inclusive" ? "]" : ")"
   }`
 }
 
-export const displayNumberBound = function(numberBound: NumberBound): string {
-  return numberBound.map(displayBound).join("∪")
+export const displayNumberBound = function(numberSet: NumberSet): string {
+  return numberSet.map(displayNumberInterval).join(" ∪ ")
 }
