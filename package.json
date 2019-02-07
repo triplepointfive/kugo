@@ -1,0 +1,12 @@
+{
+  "name": "kugo",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "author": "Ilya Smelkov <triplepointfive@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "alsatian": "^2.3.0",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.1"
+  }
+}

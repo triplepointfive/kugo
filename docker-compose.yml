@@ -1,0 +1,5 @@
+services:
+  kugo:
+    build: .
+    volumes:
+      - ./:/apps/kugo
