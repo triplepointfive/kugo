@@ -1,16 +1,15 @@
 import { Expect, Test, TestCase, TestFixture } from "alsatian"
 import {
-  displayNumberInterval,
-  NumberInterval,
   NumberBound,
-  displayNumberBound,
+  NumberInterval,
+  displayNumberInterval,
   NumberSet,
-  mergeNumberBounds,
-  Context,
-  builtInFunctions,
-  NConstant,
-  NCall
-} from "../src"
+  displayNumberBound,
+  mergeNumberBounds
+} from "../src/core/Type"
+import { Context } from "../src/core/Context"
+import { builtInFunctions } from "../src"
+import { NCall, NConstant } from "../src/core/AST"
 
 const inf: NumberBound = { type: "infinity" },
   inc = (v: number): NumberBound => {
