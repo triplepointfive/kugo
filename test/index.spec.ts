@@ -4,7 +4,12 @@ import {
   NumberInterval,
   NumberBound,
   displayNumberBound,
-  NumberSet
+  NumberSet,
+  mergeNumberBounds,
+  Context,
+  builtInFunctions,
+  NConstant,
+  NCall
 } from "../src"
 
 const inf: NumberBound = { type: "infinity" },
@@ -88,5 +93,26 @@ export class ExampleTestFixture {
         new NumberInterval(inf, inf).intersection(new NumberInterval(inf, inf))
       )
     ).toBe("(-∞, +∞)")
+  }
+
+  // TODO: Split test in more specific specs
+  @Test()
+  public mergeNumberBounds() {
+    Expect(
+      mergeNumberBounds(
+        [new NumberInterval(inf, inc(5)), new NumberInterval(inc(10), inf)],
+        [new NumberInterval(exc(3), exc(11))]
+      )
+    ).toEqual([
+      new NumberInterval(exc(3), inc(5)),
+      new NumberInterval(inc(10), exc(11))
+    ])
+  }
+
+  // TODO: Move to another file
+  @Test()
+  public evaluate() {
+    let ctx = new Context(builtInFunctions, new Map())
+    Expect(ctx.evaluate(new NCall("abs", [new NConstant(-3, [])]))).toEqual(3)
   }
 }
