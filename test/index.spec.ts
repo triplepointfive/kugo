@@ -15,6 +15,14 @@ const inf: NumberBound = { type: "infinity" },
     return { type: "exclusive", value: v }
   }
 
+const display = function(numberInterval: NumberInterval | undefined): string {
+  if (numberInterval) {
+    return displayNumberInterval(numberInterval)
+  }
+
+  return "()"
+}
+
 @TestFixture("Display number bounds")
 export class ExampleTestFixture {
   @TestCase({ bottom: inf, upper: inf }, "(-∞, +∞)")
@@ -35,40 +43,37 @@ export class ExampleTestFixture {
     Expect(displayNumberBound(numberSet)).toBe(expected)
   }
 
-  // TODO: Add not intersection cases
   @TestCase({ bottom: inf, upper: exc(1) }, "(-∞, 1)")
   @TestCase({ bottom: inf, upper: inc(5) }, "(-∞, 5]")
   @TestCase({ bottom: inc(1), upper: exc(5) }, "[1, 5)")
   @TestCase({ bottom: inc(5), upper: inf }, "[5, 5]")
+  @TestCase({ bottom: exc(5), upper: inf }, "()")
   public intersectionWithNegativeInfinity(
     interval: NumberInterval,
     expected: string
   ) {
     Expect(
-      displayNumberInterval(
-        new NumberInterval(inf, inc(5)).intersection(interval)
-      )
+      display(new NumberInterval(inf, inc(5)).intersection(interval))
     ).toBe(expected)
   }
 
   @TestCase({ bottom: inf, upper: exc(1) }, "[-5, 1)")
   @TestCase({ bottom: inc(-1), upper: exc(5) }, "[-1, 5)")
   @TestCase({ bottom: inc(5), upper: inf }, "[5, +∞)")
+  @TestCase({ bottom: inc(-9), upper: inc(-6) }, "()")
   public intersectionWithPositiveInfinity(
     interval: NumberInterval,
     expected: string
   ) {
     Expect(
-      displayNumberInterval(
-        new NumberInterval(inc(-5), inf).intersection(interval)
-      )
+      display(new NumberInterval(inc(-5), inf).intersection(interval))
     ).toBe(expected)
   }
 
   @Test()
   public intersectionLimited() {
     Expect(
-      displayNumberInterval(
+      display(
         new NumberInterval(inc(-5), exc(3)).intersection(
           new NumberInterval(exc(-4), inc(1))
         )
@@ -79,7 +84,7 @@ export class ExampleTestFixture {
   @Test()
   public intersectionUniversal() {
     Expect(
-      displayNumberInterval(
+      display(
         new NumberInterval(inf, inf).intersection(new NumberInterval(inf, inf))
       )
     ).toBe("(-∞, +∞)")

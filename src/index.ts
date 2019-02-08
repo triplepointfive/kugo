@@ -81,9 +81,20 @@ export class NumberInterval {
     return this.upper.type === "infinity"
   }
 
-  public intersection(interval: NumberInterval): NumberInterval {
+  public intersection(interval: NumberInterval): NumberInterval | undefined {
     let a = max(this.bottom, interval.bottom),
       b = min(this.upper, interval.upper)
+
+    if (a.type !== "infinity" && b.type !== "infinity") {
+      if (a.value > b.value) {
+        return undefined
+      } else if (
+        a.value == b.value &&
+        (a.type === "exclusive" || b.type === "exclusive")
+      ) {
+        return undefined
+      }
+    }
 
     return new NumberInterval(a, b)
   }
@@ -106,7 +117,7 @@ export const displayNumberBound = function(numberSet: NumberSet): string {
   return numberSet.map(displayNumberInterval).join(" ∪ ")
 }
 
-export const mergeNumberBound = function(
+export const mergeNumberBounds = function(
   a: NumberSet,
   b: NumberSet
 ): NumberSet {
