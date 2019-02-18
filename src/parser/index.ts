@@ -1,6 +1,6 @@
 import { KugoParser } from "./Parser"
 import { KugoLexer } from "./Lexer"
-import { KugoToAstVisitor } from "./Visitor"
+import { KugoToAstVisitor } from "./AstVisitor"
 
 // reuse the same parser instance.
 const parser = new KugoParser()

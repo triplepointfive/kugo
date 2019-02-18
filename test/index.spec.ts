@@ -118,15 +118,19 @@ export class ExampleTestFixture {
 
   // TODO: Move to another file
   @Test()
-  @FocusTest
   public parse() {
-    const file = `avg a b =
+    const file = `avg a b = div sum a b
+avg a b = div (sum a b) 2
 
-fst a b =
+three   =3
 
-snd a b =`,
+fst a b = (a )
+
+snd a b = b`,
       res = parseKugoFile(file)
 
+    console.log(res.ast.functionDeclarations[0].expression)
+    console.log(res.ast.functionDeclarations[1].expression)
     console.log(res.ast.functionDeclarations)
     console.log(res)
     // console.log(res.cst.children.functionDeclaration[0])
