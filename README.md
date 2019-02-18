@@ -6,6 +6,7 @@ Application = List Function
 Function = Name | List Variable | Exp
 
 Exp
+  |= ( | Exp | )
   | Const
   | Variable
   | Call

@@ -13,7 +13,8 @@
     "test": "ts-node test/runner.ts"
   },
   "dependencies": {
-    "lodash": "^4.17.11",
-    "@types/lodash": "^4.14.120"
+    "@types/lodash": "^4.14.120",
+    "chevrotain": "^4.2.0",
+    "lodash": "^4.17.11"
   }
 }
