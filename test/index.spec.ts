@@ -1,4 +1,4 @@
-import { Expect, Test, TestCase, TestFixture, FocusTest } from "alsatian"
+import { Expect, Test, TestCase, TestFixture } from "alsatian"
 import {
   NumberBound,
   NumberInterval,
@@ -10,7 +10,6 @@ import {
 import { Context } from "../src/core/Context"
 import { builtInFunctions } from "../src"
 import { NCall, NConstant } from "../src/core/AST"
-import { parseKugoFile } from "../src/parser"
 
 const inf: NumberBound = { type: "infinity" },
   inc = (v: number): NumberBound => {
@@ -114,25 +113,5 @@ export class ExampleTestFixture {
   public evaluate() {
     let ctx = new Context(builtInFunctions, new Map())
     Expect(ctx.evaluate(new NCall("abs", [new NConstant(-3, [])]))).toEqual(3)
-  }
-
-  // TODO: Move to another file
-  @Test()
-  public parse() {
-    const file = `avg a b = div sum a b
-avg a b = div (sum a b) 2
-
-three   =3
-
-fst a b = (a )
-
-snd a b = b`,
-      res = parseKugoFile(file)
-
-    console.log(res.ast.functionDeclarations[0].expression)
-    console.log(res.ast.functionDeclarations[1].expression)
-    console.log(res.ast.functionDeclarations)
-    console.log(res)
-    // console.log(res.cst.children.functionDeclaration[0])
   }
 }

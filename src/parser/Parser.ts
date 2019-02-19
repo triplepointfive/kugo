@@ -16,9 +16,16 @@ export class KugoParser extends Parser {
   }
 
   public app = this.RULE("app", () => {
-    this.MANY_SEP({
-      SEP: NewLine,
+    this.MANY1({
+      DEF: () => this.CONSUME1(NewLine)
+    })
+
+    this.MANY2({
       DEF: () => this.SUBRULE(this.functionDeclaration)
+    })
+
+    this.MANY3({
+      DEF: () => this.CONSUME2(NewLine)
     })
   })
 
@@ -32,6 +39,10 @@ export class KugoParser extends Parser {
     this.CONSUME(Define)
 
     this.SUBRULE(this.expression)
+
+    this.OPTION({
+      DEF: () => this.CONSUME1(NewLine)
+    })
   })
 
   private expression = this.RULE("expression", () => {

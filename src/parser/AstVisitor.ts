@@ -13,7 +13,7 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
 
   app(ctx: any): PApp {
     return {
-      functionDeclarations: ctx.functionDeclaration.map((fd: any) =>
+      functionDeclarations: (ctx.functionDeclaration || []).map((fd: any) =>
         this.visit(fd)
       )
     }

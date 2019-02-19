@@ -1,6 +1,5 @@
 import { TapBark } from "tap-bark"
 import { TestSet, TestRunner } from "alsatian"
-
 ;(async () => {
   const testSet = TestSet.create()
   testSet.addTestsFromFiles("./**/*.spec.ts")
@@ -13,6 +12,6 @@ import { TestSet, TestRunner } from "alsatian"
 
   await testRunner.run(testSet)
 })().catch(e => {
-  console.error(e)
+  console.error("FAIL:", e)
   process.exit(1)
 })
