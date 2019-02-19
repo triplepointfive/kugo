@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.120",
+    "@types/vorpal": "^1.11.0",
     "chevrotain": "^4.2.0",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "vorpal": "^1.12.0"
   }
 }
