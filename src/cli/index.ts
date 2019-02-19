@@ -1,4 +1,11 @@
 import readline from "readline"
+import fs from "fs"
+
+import { Context } from "../core/Context"
+import { builtInFunctions } from ".."
+import { parseKugoFile } from "../parser"
+
+let ctx = new Context(builtInFunctions, new Map())
 
 class KugoApp {
   public repl() {
@@ -16,9 +23,34 @@ class KugoApp {
     })
   }
 
+  public loadFile(filePath: string): void {
+    this.info(`Loading ${filePath}`)
+    const file = fs.readFileSync(filePath).toString()
+    this.info(`Done`)
+  }
+
   protected processInput(input: string): void {
-    console.log(input)
+    const file = `
+sumArithmetic a n = prod n (div (sum a (prod a n)) 2)
+
+lim n l = sumArithmetic n (div (subst l 1) n)
+
+main = subst (sum (lim 3 1000) (lim 5 1000)) (lim 15 1000)
+`
+
+    // ctx.evaluate(new NCall(input, [new NConstant(-3, [])]))
+    // console.log(parseKugoFile(file).ast)
+  }
+
+  protected info(message: string): void {
+    console.log(message)
   }
 }
 
-new KugoApp().repl()
+const app = new KugoApp()
+app.repl()
+
+const filePath = process.argv[2]
+if (filePath) {
+  app.loadFile(filePath)
+}

@@ -7,9 +7,6 @@ import {
   displayNumberBound,
   mergeNumberBounds
 } from "../src/core/Type"
-import { Context } from "../src/core/Context"
-import { builtInFunctions } from "../src"
-import { NCall, NConstant } from "../src/core/AST"
 
 const inf: NumberBound = { type: "infinity" },
   inc = (v: number): NumberBound => {
@@ -27,8 +24,8 @@ const display = function(numberInterval: NumberInterval | undefined): string {
   return "()"
 }
 
-@TestFixture("Display number bounds")
-export class ExampleTestFixture {
+@TestFixture("Type and what it can")
+export class TypeFixture {
   @TestCase({ bottom: inf, upper: inf }, "(-∞, +∞)")
   @TestCase({ bottom: inc(-3), upper: inf }, "[-3, +∞)")
   @TestCase({ bottom: exc(3), upper: inf }, "(3, +∞)")
@@ -106,12 +103,5 @@ export class ExampleTestFixture {
       new NumberInterval(exc(3), inc(5)),
       new NumberInterval(inc(10), exc(11))
     ])
-  }
-
-  // TODO: Move to another file
-  @Test()
-  public evaluate() {
-    let ctx = new Context(builtInFunctions, new Map())
-    Expect(ctx.evaluate(new NCall("abs", [new NConstant(-3, [])]))).toEqual(3)
   }
 }
