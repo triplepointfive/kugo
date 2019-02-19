@@ -1,12 +1,24 @@
-import Vorpal = require("vorpal")
-import { Args, CommandInstance } from "vorpal"
+import readline from "readline"
 
-const vorpal = new Vorpal()
+class KugoApp {
+  public repl() {
+    const rl = readline.createInterface(process.stdin, process.stdout)
 
-vorpal
-  .command("query", "Queries the server")
-  .action(async function(this: CommandInstance, args: Args) {
-    this.log("query")
-  })
+    rl.setPrompt("> ")
+    rl.prompt()
 
-vorpal.delimiter("kugo> ").show()
+    rl.on("line", (input: string) => {
+      if (input.length) {
+        this.processInput(input)
+      }
+
+      rl.prompt()
+    })
+  }
+
+  protected processInput(input: string): void {
+    console.log(input)
+  }
+}
+
+new KugoApp().repl()
