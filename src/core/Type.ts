@@ -61,7 +61,7 @@ const max = (a: INumberBound, b: INumberBound): INumberBound => {
   }
 };
 
-export class INumberInterval {
+export class NumberInterval implements INumberInterval {
   constructor(
     public readonly bottom: INumberBound,
     public readonly upper: INumberBound,
@@ -79,7 +79,7 @@ export class INumberInterval {
     return this.upper.type === "infinity";
   }
 
-  public intersection(interval: INumberInterval): INumberInterval | undefined {
+  public intersection(interval: INumberInterval): NumberInterval | undefined {
     const a = max(this.bottom, interval.bottom);
     const b = min(this.upper, interval.upper);
 
@@ -94,16 +94,16 @@ export class INumberInterval {
       }
     }
 
-    return new INumberInterval(a, b);
+    return new NumberInterval(a, b);
   }
 }
 
-export type NumberSet = INumberInterval[];
+export type NumberSet = NumberInterval[];
 
 export const displayNumberInterval = ({
   bottom,
   upper,
-}: INumberInterval): string => {
+}: NumberInterval): string => {
   return `${bottom.type === "inclusive" ? "[" : "("}${
     bottom.type === "infinity" ? "-∞" : bottom.value
     }, ${upper.type === "infinity" ? "+∞" : upper.value}${

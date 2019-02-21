@@ -1,5 +1,5 @@
-import { Context } from "vm";
 import { INExpression, Value } from ".";
+import { Context } from "../Context";
 
 export class NCall implements INExpression {
   constructor(

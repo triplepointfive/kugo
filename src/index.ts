@@ -1,6 +1,6 @@
 import { Body, IFunctionAnnotation, Value } from "./core/AST";
 import { Context } from "./core/Context";
-import { INumberBound, INumberInterval } from "./core/Type";
+import { INumberBound, NumberInterval } from "./core/Type";
 
 export const inf: INumberBound = { type: "infinity" };
 export const inc = (v: number): INumberBound => {
@@ -36,49 +36,49 @@ const buildBody = (f: any, ...names: string[]): Body => {
 
 export const divBody: IFunctionAnnotation = {
   args: [
-    ["a", [new INumberInterval(inf, inf)]],
-    ["b", [new INumberInterval(inf, exc(0)), new INumberInterval(exc(0), inf)]],
+    ["a", [new NumberInterval(inf, inf)]],
+    ["b", [new NumberInterval(inf, exc(0)), new NumberInterval(exc(0), inf)]],
   ],
   body: {
     eval: (ctx) =>
       buildBody((a: Value, b: Value) => Math.floor(a / b), "a", "b")(ctx),
   },
-  returnType: [new INumberInterval(inf, inf)],
+  returnType: [new NumberInterval(inf, inf)],
 };
 export const substBody: IFunctionAnnotation = {
   args: [
-    ["a", [new INumberInterval(inf, inf)]],
-    ["b", [new INumberInterval(inf, inf)]],
+    ["a", [new NumberInterval(inf, inf)]],
+    ["b", [new NumberInterval(inf, inf)]],
   ],
   body: {
     eval: (ctx) => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx),
   },
-  returnType: [new INumberInterval(inf, inf)],
+  returnType: [new NumberInterval(inf, inf)],
 };
 export const sumBody: IFunctionAnnotation = {
   args: [
-    ["a", [new INumberInterval(inf, inf)]],
-    ["b", [new INumberInterval(inf, inf)]],
+    ["a", [new NumberInterval(inf, inf)]],
+    ["b", [new NumberInterval(inf, inf)]],
   ],
   body: {
     eval: (ctx) => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx),
   },
-  returnType: [new INumberInterval(inf, inf)],
+  returnType: [new NumberInterval(inf, inf)],
 };
 export const prodBody: IFunctionAnnotation = {
   args: [
-    ["a", [new INumberInterval(inf, inf)]],
-    ["b", [new INumberInterval(inf, inf)]],
+    ["a", [new NumberInterval(inf, inf)]],
+    ["b", [new NumberInterval(inf, inf)]],
   ],
   body: {
     eval: (ctx) => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx),
   },
-  returnType: [new INumberInterval(inf, inf)],
+  returnType: [new NumberInterval(inf, inf)],
 };
 export const absBody: IFunctionAnnotation = {
-  args: [["v", [new INumberInterval(inf, inf)]]],
+  args: [["v", [new NumberInterval(inf, inf)]]],
   body: { eval: (ctx) => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
-  returnType: [new INumberInterval(inc(0), inf)],
+  returnType: [new NumberInterval(inc(0), inf)],
 };
 
 export const builtInFunctions: Map<string, IFunctionAnnotation> = new Map([

@@ -1,5 +1,5 @@
-import { Context } from "vm";
 import { INExpression, Value } from ".";
+import { Context } from "../Context";
 import { Type } from "../Type";
 
 export class NConstant implements INExpression {

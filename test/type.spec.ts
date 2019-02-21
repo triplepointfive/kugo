@@ -1,10 +1,10 @@
-import { Expect, Test, TestCase, TestFixture } from "alsatian";
 import {
   displayNumberBound,
   displayNumberInterval,
   INumberBound,
   INumberInterval,
   mergeNumberBounds,
+  NumberInterval,
   NumberSet,
 } from "../src/core/Type";
 
@@ -16,7 +16,7 @@ const exc = (v: number): INumberBound => {
   return { type: "exclusive", value: v };
 };
 
-const display = (numberInterval: INumberInterval | undefined): string => {
+const display = (numberInterval: NumberInterval | undefined): string => {
   if (numberInterval) {
     return displayNumberInterval(numberInterval);
   }
@@ -24,86 +24,85 @@ const display = (numberInterval: INumberInterval | undefined): string => {
   return "()";
 };
 
-@TestFixture("Type and what it can")
-export class TypeFixture {
-  @TestCase({ bottom: inf, upper: inf }, "(-∞, +∞)")
-  @TestCase({ bottom: inc(-3), upper: inf }, "[-3, +∞)")
-  @TestCase({ bottom: exc(3), upper: inf }, "(3, +∞)")
-  @TestCase({ bottom: inc(3), upper: inc(5) }, "[3, 5]")
-  @TestCase({ bottom: inf, upper: inc(5) }, "(-∞, 5]")
-  @TestCase({ bottom: inf, upper: exc(-3) }, "(-∞, -3)")
-  public displayNumberInterval(bound: INumberInterval, expected: string) {
-    Expect(displayNumberInterval(bound)).toBe(expected);
-  }
+describe("Type and what it can", () => {
+  it("displayNumberInterval", () => {
+    const cases: Array<[INumberInterval, string]> = [
+      [{ bottom: inf, upper: inf }, "(-∞, +∞)"],
+      [{ bottom: inc(-3), upper: inf }, "[-3, +∞)"],
+      [{ bottom: exc(3), upper: inf }, "(3, +∞)"],
+      [{ bottom: inc(3), upper: inc(5) }, "[3, 5]"],
+      [{ bottom: inf, upper: inc(5) }, "(-∞, 5]"],
+      [{ bottom: inf, upper: exc(-3) }, "(-∞, -3)"],
+    ];
 
-  @TestCase(
-    [{ bottom: inf, upper: exc(3) }, { bottom: exc(3), upper: inf }],
-    "(-∞, 3) ∪ (3, +∞)",
-  )
-  public displayNumberBound(numberSet: NumberSet, expected: string) {
-    Expect(displayNumberBound(numberSet)).toBe(expected);
-  }
+    cases.forEach(([{ bottom, upper }, expected]) => {
+      expect(displayNumberInterval(new NumberInterval(bottom, upper))).toBe(expected);
+    });
+  });
 
-  @TestCase({ bottom: inf, upper: exc(1) }, "(-∞, 1)")
-  @TestCase({ bottom: inf, upper: inc(5) }, "(-∞, 5]")
-  @TestCase({ bottom: inc(1), upper: exc(5) }, "[1, 5)")
-  @TestCase({ bottom: inc(5), upper: inf }, "[5, 5]")
-  @TestCase({ bottom: exc(5), upper: inf }, "()")
-  public intersectionWithNegativeInfinity(
-    interval: INumberInterval,
-    expected: string,
-  ) {
-    Expect(
-      display(new INumberInterval(inf, inc(5)).intersection(interval)),
-    ).toBe(expected);
-  }
+  it("displayNumberBound", () => {
+    const numberSet: NumberSet = [new NumberInterval(inf, exc(3)), new NumberInterval(exc(3), inf)];
+    const expected: string = "(-∞, 3) ∪ (3, +∞)";
 
-  @TestCase({ bottom: inf, upper: exc(1) }, "[-5, 1)")
-  @TestCase({ bottom: inc(-1), upper: exc(5) }, "[-1, 5)")
-  @TestCase({ bottom: inc(5), upper: inf }, "[5, +∞)")
-  @TestCase({ bottom: inc(-9), upper: inc(-6) }, "()")
-  public intersectionWithPositiveInfinity(
-    interval: INumberInterval,
-    expected: string,
-  ) {
-    Expect(
-      display(new INumberInterval(inc(-5), inf).intersection(interval)),
-    ).toBe(expected);
-  }
+    expect(displayNumberBound(numberSet)).toBe(expected);
+  });
 
-  @Test()
-  public intersectionLimited() {
-    Expect(
+  it("intersectionWithNegativeInfinity", () => {
+    const cases: Array<[INumberInterval, string]> = [
+      [{ bottom: inf, upper: exc(1) }, "(-∞, 1)"],
+      [{ bottom: inf, upper: inc(5) }, "(-∞, 5]"],
+      [{ bottom: inc(1), upper: exc(5) }, "[1, 5)"],
+      [{ bottom: inc(5), upper: inf }, "[5, 5]"],
+      [{ bottom: exc(5), upper: inf }, "()"],
+    ];
+
+    cases.forEach(([interval, expected]) => {
+      expect(display(new NumberInterval(inf, inc(5)).intersection(interval))).toBe(expected);
+    });
+  });
+
+  it("intersectionWithPositiveInfinity", () => {
+    const cases: Array<[INumberInterval, string]> = [
+      [{ bottom: inf, upper: exc(1) }, "[-5, 1)"],
+      [{ bottom: inc(-1), upper: exc(5) }, "[-1, 5)"],
+      [{ bottom: inc(5), upper: inf }, "[5, +∞)"],
+      [{ bottom: inc(-9), upper: inc(-6) }, "()"],
+    ];
+
+    cases.forEach(([interval, expected]) => {
+      expect(display(new NumberInterval(inc(-5), inf).intersection(interval))).toBe(expected);
+    });
+  });
+
+  it("intersectionLimited", () => {
+    expect(
       display(
-        new INumberInterval(inc(-5), exc(3)).intersection(
-          new INumberInterval(exc(-4), inc(1)),
+        new NumberInterval(inc(-5), exc(3)).intersection(
+          new NumberInterval(exc(-4), inc(1)),
         ),
       ),
     ).toBe("(-4, 1]");
-  }
+  });
 
-  @Test()
-  public intersectionUniversal() {
-    Expect(
+  it("intersectionUniversal", () => {
+    expect(
       display(
-        new INumberInterval(inf, inf).intersection(
-          new INumberInterval(inf, inf),
+        new NumberInterval(inf, inf).intersection(
+          new NumberInterval(inf, inf),
         ),
       ),
     ).toBe("(-∞, +∞)");
-  }
+  });
 
-  // TODO: Split test in more specific specs
-  @Test()
-  public mergeNumberBounds() {
-    Expect(
+  it("mergeNumberBounds", () => {
+    expect(
       mergeNumberBounds(
-        [new INumberInterval(inf, inc(5)), new INumberInterval(inc(10), inf)],
-        [new INumberInterval(exc(3), exc(11))],
+        [new NumberInterval(inf, inc(5)), new NumberInterval(inc(10), inf)],
+        [new NumberInterval(exc(3), exc(11))],
       ),
     ).toEqual([
-      new INumberInterval(exc(3), inc(5)),
-      new INumberInterval(inc(10), exc(11)),
+      new NumberInterval(exc(3), inc(5)),
+      new NumberInterval(inc(10), exc(11)),
     ]);
-  }
-}
+  });
+});

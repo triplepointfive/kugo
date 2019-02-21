@@ -1,5 +1,3 @@
-import { Expect, TestCase, TestFixture } from "alsatian";
-
 import { parseKugoFile } from "../src/parser";
 import { IPApp, IPExpression, IPFunctionDeclaration } from "../src/parser/AST";
 
@@ -45,27 +43,38 @@ const cons = (value: number): IPExpression => {
 const fst = f("fst", ["a", "b"], call("a", []));
 const snd = f("snd", ["a", "b"], call("b", []));
 
-@TestFixture("Parsers source code into AST")
-export class ParserFixture {
-  @TestCase(
-    "avg a b = div sum a b",
-    app(f("avg", ["a", "b"], call("div", [call("sum"), call("a"), call("b")]))),
-  )
-  @TestCase(
-    "avg a b = div (sum a b) 2",
-    app(
-      f(
-        "avg",
-        ["a", "b"],
-        call("div", [call("sum", [call("a"), call("b")]), cons(2)]),
-      ),
-    ),
-  )
-  @TestCase("three   =3", app(f("three", [], cons(3))))
-  @TestCase("fst a b = (a )", app(fst))
-  @TestCase("snd a b = b", app(snd))
-  @TestCase(`\n  \nfst a b = a\n\nsnd a b = b\n  \n `, apps([fst, snd]))
-  public parseLine(file: string, ast: IPApp) {
-    Expect(parseKugoFile(file).ast).toEqual(ast);
-  }
-}
+describe("Parser", () => {
+  it("Parsers source code into AST", () => {
+    const cases: Array<[string, IPApp]> = [
+      [
+        "avg a b = div sum a b",
+        app(f("avg", ["a", "b"], call("div", [call("sum"), call("a"), call("b")])))],
+      [
+        "avg a b = div (sum a b) 2",
+        app(
+          f(
+            "avg",
+            ["a", "b"],
+            call("div", [call("sum", [call("a"), call("b")]), cons(2)]),
+          ),
+        ),
+      ],
+      ["three   =3", app(f("three", [], cons(3))),
+
+      ],
+      ["fst a b = (a )", app(fst),
+
+      ],
+      ["snd a b = b", app(snd),
+
+      ],
+      [`\n  \nfst a b = a\n\nsnd a b = b\n  \n `, apps([fst, snd]),
+
+      ],
+    ];
+
+    cases.forEach(([file, ast]) => {
+      expect(parseKugoFile(file).ast).toEqual(ast);
+    });
+  });
+});
