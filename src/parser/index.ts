@@ -1,12 +1,20 @@
 import { KugoParser } from "./Parser"
 import { KugoLexer } from "./Lexer"
 import { KugoToAstVisitor } from "./AstVisitor"
+import { PApp } from "./AST"
 
 // reuse the same parser instance.
 const parser = new KugoParser()
 const toAstVisitorInstance = new KugoToAstVisitor()
 
-export function parseKugoFile(text: string) {
+type IParser = {
+  ast: PApp
+  cst: any
+  lexErrors: any
+  parseErrors: any
+}
+
+export function parseKugoFile(text: string): IParser {
   const lexResult = KugoLexer.tokenize(text)
   // setting a new input will RESET the parser instance's state.
   parser.input = lexResult.tokens

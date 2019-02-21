@@ -9,12 +9,16 @@ export class Context {
     private readonly local: ArgsTable
   ) {}
 
+  public extend(ext: FunctionsTable): Context {
+    return new Context(new Map([...this.global, ...ext]), this.local)
+  }
+
   public nest(local: ArgsTable): Context {
     return new Context(this.global, local)
   }
 
-  public evaluate(expression: NExpression): Value | Error {
-    return expression.call(this)
+  public evaluate(expression: NExpression): Value | Error[] {
+    return expression.eval(this)
   }
 
   public lookupFunction(name: string): FunctionAnnotation | undefined {

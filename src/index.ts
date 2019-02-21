@@ -1,7 +1,8 @@
 import { NumberBound, NumberInterval } from "./core/Type"
-import { FunctionAnnotation, Value } from "./core/AST"
+import { FunctionAnnotation, Value, Body } from "./core/AST"
+import { Context } from "./core/Context"
 
-const inf: NumberBound = { type: "infinity" },
+export const inf: NumberBound = { type: "infinity" },
   inc = (v: number): NumberBound => {
     return { type: "inclusive", value: v }
   },
@@ -9,21 +10,49 @@ const inf: NumberBound = { type: "infinity" },
     return { type: "exclusive", value: v }
   }
 
-const divBody: FunctionAnnotation = {
+const buildBody = function(f: any, ...names: string[]): Body {
+  return function(ctx: Context): Value | Error[] {
+    let missed: string[] = [],
+      values: Value[] = []
+
+    names.forEach(name => {
+      // TODO: Check whether it can be not-local
+      let val = ctx.lookupLocal(name)
+
+      if (val) {
+        values.push(val)
+      } else {
+        missed.push(name)
+      }
+    })
+
+    if (missed.length) {
+      return missed.map(name => new Error(`Function ${name} not found`))
+    }
+
+    return f.apply(null, values)
+  }
+}
+
+export const divBody: FunctionAnnotation = {
     args: [
       ["a", [new NumberInterval(inf, inf)]],
       ["b", [new NumberInterval(inf, exc(0)), new NumberInterval(exc(0), inf)]]
     ],
     returnType: [new NumberInterval(inf, inf)],
-    body: (a: Value, b: Value) => a / b
+    body: {
+      eval: ctx => buildBody((a: Value, b: Value) => a / b, "a", "b")(ctx)
+    }
   },
   absBody: FunctionAnnotation = {
     args: [["v", [new NumberInterval(inf, inf)]]],
     returnType: [new NumberInterval(inc(0), inf)],
-    body: (v: Value) => Math.abs(v)
+    body: { eval: ctx => buildBody((v: Value) => Math.abs(v), "v")(ctx) }
   }
 
 export const builtInFunctions: Map<string, FunctionAnnotation> = new Map([
   ["div", divBody],
   ["abs", absBody]
 ])
+
+export const builtInContext = new Context(builtInFunctions, new Map())
