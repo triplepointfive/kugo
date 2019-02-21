@@ -2,7 +2,6 @@ import fs from "fs";
 import yargs from "yargs";
 
 import { builtInContext } from "..";
-import { buildAst } from "../core/AST";
 import { parseKugoFile } from "../parser";
 
 const clo = yargs
@@ -14,7 +13,7 @@ const files = clo.argv._;
 if (files.length === 1) {
   const file = fs.readFileSync(files[0]).toString();
   const parsedAst = parseKugoFile(file).ast;
-  const ctx = buildAst(builtInContext, parsedAst);
+  const ctx = builtInContext.extend(parsedAst);
   const main = ctx.lookupFunction("main");
 
   if (main) {

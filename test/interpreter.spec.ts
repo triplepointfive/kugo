@@ -1,7 +1,8 @@
 import { Expect, Test, TestFixture } from "alsatian";
 
 import { builtInFunctions } from "../src";
-import { NCall, NConstant } from "../src/core/AST";
+import { NCall } from "../src/core/AST/NCall";
+import { NConstant } from "../src/core/AST/NConstant";
 import { Context } from "../src/core/Context";
 
 @TestFixture("Runs given AST")
