@@ -115,7 +115,7 @@ const buildBody = (exp: PExpression): Body => {
           return ctxFunction.body.eval(ctx.nest(local))
         }
 
-        return [new Error(`Function ${exp.name} now found`)]
+        return [new Error(`Function ${exp.name} not found`)]
     }
   }
 }

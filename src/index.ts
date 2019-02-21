@@ -41,7 +41,38 @@ export const divBody: FunctionAnnotation = {
     ],
     returnType: [new NumberInterval(inf, inf)],
     body: {
-      eval: ctx => buildBody((a: Value, b: Value) => a / b, "a", "b")(ctx)
+      eval: ctx =>
+        buildBody((a: Value, b: Value) => Math.floor(a / b), "a", "b")(ctx)
+    }
+  },
+  substBody: FunctionAnnotation = {
+    args: [
+      ["a", [new NumberInterval(inf, inf)]],
+      ["b", [new NumberInterval(inf, inf)]]
+    ],
+    returnType: [new NumberInterval(inf, inf)],
+    body: {
+      eval: ctx => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx)
+    }
+  },
+  sumBody: FunctionAnnotation = {
+    args: [
+      ["a", [new NumberInterval(inf, inf)]],
+      ["b", [new NumberInterval(inf, inf)]]
+    ],
+    returnType: [new NumberInterval(inf, inf)],
+    body: {
+      eval: ctx => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx)
+    }
+  },
+  prodBody: FunctionAnnotation = {
+    args: [
+      ["a", [new NumberInterval(inf, inf)]],
+      ["b", [new NumberInterval(inf, inf)]]
+    ],
+    returnType: [new NumberInterval(inf, inf)],
+    body: {
+      eval: ctx => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx)
     }
   },
   absBody: FunctionAnnotation = {
@@ -51,6 +82,9 @@ export const divBody: FunctionAnnotation = {
   }
 
 export const builtInFunctions: Map<string, FunctionAnnotation> = new Map([
+  ["sum", sumBody],
+  ["prod", prodBody],
+  ["subst", substBody],
   ["div", divBody],
   ["abs", absBody]
 ])

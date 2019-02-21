@@ -14,9 +14,15 @@ const clo = yargs
 if (files.length === 1) {
   const file = fs.readFileSync(files[0]).toString(),
     parsedAst = parseKugoFile(file).ast,
-    ctx = buildAst(builtInContext, parsedAst)
+    ctx = buildAst(builtInContext, parsedAst),
+    main = ctx.lookupFunction("main")
 
-  console.log("rest: ", ctx)
+  if (main) {
+    const resp = main.body.eval(ctx)
+    console.log(resp)
+  } else {
+    console.error("Function main is not found")
+  }
 } else {
   clo.showHelp()
 }

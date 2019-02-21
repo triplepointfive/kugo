@@ -1,4 +1,4 @@
-import { TestFixture, Test, Expect, FocusTest } from "alsatian"
+import { TestFixture, Test, Expect } from "alsatian"
 
 import { Context } from "../src/core/Context"
 import { builtInFunctions } from "../src"

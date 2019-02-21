@@ -1,0 +1,1 @@
+avg a b = div (sum a b) 2
