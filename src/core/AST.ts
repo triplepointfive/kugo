@@ -1,121 +1,121 @@
-import { Type, NumberInterval } from "./Type"
-import { Context, FunctionsTable, ArgsTable } from "./Context"
-import { PApp, PExpression } from "../parser/AST"
-import { inf } from ".."
+import { inf } from "..";
+import { IPApp, IPExpression } from "../parser/AST";
+import { ArgsTable, Context, FunctionsTable } from "./Context";
+import { INumberInterval, Type } from "./Type";
 
-export type Arg = [string, Type]
+export type Arg = [string, Type];
 
-export type Value = number
-export type Body = (ctx: Context) => Value | Error[]
+export type Value = number;
+export type Body = (ctx: Context) => Value | Error[];
 
-export interface NExpression {
-  eval: Body
+export interface INExpression {
+  eval: Body;
 }
 
-export class NConstant implements NExpression {
-  constructor(public readonly value: Value, public readonly type: Type) {}
+export class NConstant implements INExpression {
+  constructor(public readonly value: Value, public readonly type: Type) { }
 
   public eval(context: Context): Value | Error[] {
-    return this.value
+    return this.value;
   }
 }
 
-export class NCall implements NExpression {
+export class NCall implements INExpression {
   constructor(
     public readonly name: string,
-    public readonly args: [NExpression]
-  ) {}
+    public readonly args: [INExpression],
+  ) { }
 
   public eval(context: Context): Value | Error[] {
-    return context.lookupLocal(this.name) || this.buildMethod(context)
+    return context.lookupLocal(this.name) || this.buildMethod(context);
   }
 
   private buildMethod(context: Context): Value | Error[] {
-    const functionAnnotation = context.lookupFunction(this.name)
+    const functionAnnotation = context.lookupFunction(this.name);
     if (functionAnnotation === undefined) {
-      return [new Error(`Unknown function ${this.name}`)]
+      return [new Error(`Unknown function ${this.name}`)];
     }
 
-    return functionAnnotation.body.eval(context)
+    return functionAnnotation.body.eval(context);
   }
 }
 
-export type FunctionAnnotation = {
-  args: Arg[]
-  returnType: Type
-  body: NExpression
+export interface IFunctionAnnotation {
+  args: Arg[];
+  returnType: Type;
+  body: INExpression;
 }
 
-export const buildAst = (context: Context, pApp: PApp): Context => {
-  let ext: FunctionsTable = new Map()
+export const buildAst = (context: Context, pApp: IPApp): Context => {
+  const ext: FunctionsTable = new Map();
 
   // TODO: Build and check types
-  const type = [new NumberInterval(inf, inf)]
+  const type = [new INumberInterval(inf, inf)];
 
   // TODO: Allow to use not yet defined function
-  pApp.functionDeclarations.forEach(fd => {
+  pApp.functionDeclarations.forEach((fd) => {
     if (context.lookupFunction(fd.name)) {
       // TODO throw already defined
     }
 
-    let a: FunctionAnnotation = {
+    const a: IFunctionAnnotation = {
       args: fd.args.map((name: string): Arg => [name, type]),
+      body: { eval: buildBody(fd.expression) },
       returnType: type,
-      body: { eval: buildBody(fd.expression) }
-    }
+    };
 
-    ext.set(fd.name, a)
-  })
+    ext.set(fd.name, a);
+  });
 
-  return context.extend(ext)
-}
+  return context.extend(ext);
+};
 
-const buildBody = (exp: PExpression): Body => {
+const buildBody = (exp: IPExpression): Body => {
   return (ctx: Context): Value | Error[] => {
     switch (exp.type) {
       case "number":
-        return exp.value
+        return exp.value;
       case "call":
-        const val = ctx.lookupLocal(exp.name)
+        const localValue = ctx.lookupLocal(exp.name);
 
         // TODO: Check exp has no args
-        if (val) {
-          return val
+        if (localValue) {
+          return localValue;
         }
 
-        const ctxFunction = ctx.lookupFunction(exp.name)
+        const ctxFunction = ctx.lookupFunction(exp.name);
 
         if (ctxFunction) {
-          const mValues = exp.args.map(arg => buildBody(arg)(ctx))
+          const mValues = exp.args.map((arg) => buildBody(arg)(ctx));
 
-          let valueErrors: Error[] = [],
-            values: Value[] = []
+          let valueErrors: Error[] = [];
+          const values: Value[] = [];
 
-          mValues.forEach(val => {
+          mValues.forEach((val) => {
             if (val instanceof Array) {
-              valueErrors = valueErrors.concat(val)
+              valueErrors = valueErrors.concat(val);
             } else {
-              values.push(val)
+              values.push(val);
             }
-          })
+          });
 
           if (valueErrors.length) {
-            return valueErrors
+            return valueErrors;
           }
 
           // TODO: Check sizes
           const local: ArgsTable = new Map(
             ctxFunction.args.map(
               ([name, _]: Arg, i: number): [string, Value] => {
-                return [name, values[i]]
-              }
-            )
-          )
+                return [name, values[i]];
+              },
+            ),
+          );
 
-          return ctxFunction.body.eval(ctx.nest(local))
+          return ctxFunction.body.eval(ctx.nest(local));
         }
 
-        return [new Error(`Function ${exp.name} not found`)]
+        return [new Error(`Function ${exp.name} not found`)];
     }
-  }
-}
+  };
+};

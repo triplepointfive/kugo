@@ -1,14 +1,14 @@
-import { TestFixture, Test, Expect } from "alsatian"
+import { Expect, Test, TestFixture } from "alsatian";
 
-import { Context } from "../src/core/Context"
-import { builtInFunctions } from "../src"
-import { NCall, NConstant } from "../src/core/AST"
+import { builtInFunctions } from "../src";
+import { NCall, NConstant } from "../src/core/AST";
+import { Context } from "../src/core/Context";
 
 @TestFixture("Runs given AST")
 export class InterpreterFixture {
   @Test()
   public evaluate() {
-    let ctx = new Context(builtInFunctions, new Map([["v", -3]]))
-    Expect(ctx.evaluate(new NCall("abs", [new NConstant(-3, [])]))).toEqual(3)
+    const ctx = new Context(builtInFunctions, new Map([["v", -3]]));
+    Expect(ctx.evaluate(new NCall("abs", [new NConstant(-3, [])]))).toEqual(3);
   }
 }

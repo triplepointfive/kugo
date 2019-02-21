@@ -1,13 +1,13 @@
-export interface PApp {
-  functionDeclarations: PFunctionDeclaration[]
+export interface IPApp {
+  functionDeclarations: IPFunctionDeclaration[];
 }
 
-export interface PFunctionDeclaration {
-  name: string
-  args: string[]
-  expression: PExpression
+export interface IPFunctionDeclaration {
+  name: string;
+  args: string[];
+  expression: IPExpression;
 }
 
-export type PExpression =
-  | { type: "call"; name: string; args: PExpression[] }
-  | { type: "number"; value: number }
+export type IPExpression =
+  | { type: "call"; name: string; args: IPExpression[] }
+  | { type: "number"; value: number };

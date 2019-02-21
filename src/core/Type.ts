@@ -1,137 +1,134 @@
-export type NumberBound =
+export type INumberBound =
   | { readonly type: "inclusive" | "exclusive"; readonly value: number }
-  | { readonly type: "infinity" }
+  | { readonly type: "infinity" };
 
-export interface NumberInterval {
-  readonly bottom: NumberBound
-  readonly upper: NumberBound
+export interface INumberInterval {
+  readonly bottom: INumberBound;
+  readonly upper: INumberBound;
 }
 
 // Min is only affecting positive infinity
-const min = function(a: NumberBound, b: NumberBound): NumberBound {
+const min = (a: INumberBound, b: INumberBound): INumberBound => {
   if (a.type === "infinity") {
-    return b
+    return b;
   }
 
   if (b.type === "infinity") {
-    return a
+    return a;
   }
 
   if (a.value === b.value) {
     return {
       type:
-        a.type == "exclusive" || b.type == "exclusive"
+        a.type === "exclusive" || b.type === "exclusive"
           ? "exclusive"
           : "inclusive",
-      value: a.value
-    }
+      value: a.value,
+    };
   }
 
   if (a.value < b.value) {
-    return a
+    return a;
   } else {
-    return b
+    return b;
   }
-}
+};
 
 // Max is only affecting negative infinity
-const max = function(a: NumberBound, b: NumberBound): NumberBound {
+const max = (a: INumberBound, b: INumberBound): INumberBound => {
   if (a.type === "infinity") {
-    return b
+    return b;
   }
 
   if (b.type === "infinity") {
-    return a
+    return a;
   }
 
   if (a.value === b.value) {
     return {
       type:
-        a.type == "exclusive" && b.type == "exclusive"
+        a.type === "exclusive" && b.type === "exclusive"
           ? "exclusive"
           : "inclusive",
-      value: a.value
-    }
+      value: a.value,
+    };
   }
 
   if (a.value > b.value) {
-    return a
+    return a;
   } else {
-    return b
+    return b;
   }
-}
+};
 
-export class NumberInterval {
+export class INumberInterval {
   constructor(
-    public readonly bottom: NumberBound,
-    public readonly upper: NumberBound
-  ) {}
+    public readonly bottom: INumberBound,
+    public readonly upper: INumberBound,
+  ) { }
 
   public get isUniversal(): boolean {
-    return this.negativeInf && this.positiveInf
+    return this.negativeInf && this.positiveInf;
   }
 
   public get negativeInf(): boolean {
-    return this.bottom.type === "infinity"
+    return this.bottom.type === "infinity";
   }
 
   public get positiveInf(): boolean {
-    return this.upper.type === "infinity"
+    return this.upper.type === "infinity";
   }
 
-  public intersection(interval: NumberInterval): NumberInterval | undefined {
-    let a = max(this.bottom, interval.bottom),
-      b = min(this.upper, interval.upper)
+  public intersection(interval: INumberInterval): INumberInterval | undefined {
+    const a = max(this.bottom, interval.bottom);
+    const b = min(this.upper, interval.upper);
 
     if (a.type !== "infinity" && b.type !== "infinity") {
       if (a.value > b.value) {
-        return undefined
+        return undefined;
       } else if (
-        a.value == b.value &&
+        a.value === b.value &&
         (a.type === "exclusive" || b.type === "exclusive")
       ) {
-        return undefined
+        return undefined;
       }
     }
 
-    return new NumberInterval(a, b)
+    return new INumberInterval(a, b);
   }
 }
 
-export type NumberSet = NumberInterval[]
+export type NumberSet = INumberInterval[];
 
-export const displayNumberInterval = function({
+export const displayNumberInterval = ({
   bottom,
-  upper
-}: NumberInterval): string {
+  upper,
+}: INumberInterval): string => {
   return `${bottom.type === "inclusive" ? "[" : "("}${
     bottom.type === "infinity" ? "-∞" : bottom.value
-  }, ${upper.type === "infinity" ? "+∞" : upper.value}${
+    }, ${upper.type === "infinity" ? "+∞" : upper.value}${
     upper.type === "inclusive" ? "]" : ")"
-  }`
-}
+    }`;
+};
 
-export const displayNumberBound = function(numberSet: NumberSet): string {
-  return numberSet.map(displayNumberInterval).join(" ∪ ")
-}
+export const displayNumberBound = (numberSet: NumberSet): string => {
+  return numberSet.map(displayNumberInterval).join(" ∪ ");
+};
 
-export const mergeNumberBounds = function(
-  a: NumberSet,
-  b: NumberSet
-): NumberSet {
-  let resultSet: NumberSet = []
+export const mergeNumberBounds = (a: NumberSet, b: NumberSet): NumberSet => {
+  const resultSet: NumberSet = [];
 
-  a.forEach(interval1 => {
-    b.forEach(interval2 => {
-      let intersection = interval1.intersection(interval2)
+  a.forEach((interval1) => {
+    b.forEach((interval2) => {
+      const intersection = interval1.intersection(interval2);
       if (intersection) {
-        resultSet.push(intersection)
+        resultSet.push(intersection);
       }
-    })
-  })
+    });
+  });
 
   // TODO: Add normalization
-  return resultSet
-}
+  return resultSet;
+};
 
-export type Type = NumberSet
+export type Type = NumberSet;

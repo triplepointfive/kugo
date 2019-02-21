@@ -1,70 +1,70 @@
-import { KugoParser } from "./Parser"
-import { PApp, PFunctionDeclaration, PExpression } from "./AST"
-import { tail } from "lodash"
+import { tail } from "lodash";
+import { IPApp, IPExpression, IPFunctionDeclaration } from "./AST";
+import { KugoParser } from "./Parser";
 
-const parserInstance = new KugoParser()
-const BaseKugoVisitor = parserInstance.getBaseCstVisitorConstructor()
+const parserInstance = new KugoParser();
+const BaseKugoVisitor = parserInstance.getBaseCstVisitorConstructor();
 
 export class KugoToAstVisitor extends BaseKugoVisitor {
   constructor() {
-    super()
-    this.validateVisitor()
+    super();
+    this.validateVisitor();
   }
 
-  app(ctx: any): PApp {
+  public app(ctx: any): IPApp {
     return {
       functionDeclarations: (ctx.functionDeclaration || []).map((fd: any) =>
-        this.visit(fd)
-      )
-    }
+        this.visit(fd),
+      ),
+    };
   }
 
-  functionDeclaration(ctx: any): PFunctionDeclaration {
+  public functionDeclaration(ctx: any): IPFunctionDeclaration {
     return {
-      name: ctx.Identity[0].image,
       args: tail(ctx.Identity).map((token: any): string => token.image),
-      expression: this.visit(ctx.expression)
-    }
+      expression: this.visit(ctx.expression),
+      name: ctx.Identity[0].image,
+    };
   }
 
-  expression(ctx: any): PExpression {
+  public expression(ctx: any): IPExpression {
     if (ctx.functionCall) {
-      return this.visit(ctx.functionCall)
+      return this.visit(ctx.functionCall);
     } else if (ctx.Const) {
-      return this.buildConst(ctx)
+      return this.buildConst(ctx);
     } else {
       // When it's wrapped with parentheses
-      return this.visit(ctx.expression)
+      return this.visit(ctx.expression);
     }
   }
 
-  functionCall(ctx: any): PExpression {
+  public functionCall(ctx: any): IPExpression {
     return {
-      type: "call",
+      args: (ctx.functionArg || []).map((exp: any) => this.visit(exp)),
       name: ctx.Identity[0].image,
-      args: (ctx.functionArg || []).map((exp: any) => this.visit(exp))
-    }
+      type: "call",
+    };
   }
 
-  functionArg(ctx: any): PExpression {
+  public functionArg(ctx: any): IPExpression {
     if (ctx.Identity) {
       return {
-        type: "call",
+        args: [],
         name: ctx.Identity[0].image,
-        args: []
-      }
+        type: "call",
+      };
     } else if (ctx.Const) {
-      return this.buildConst(ctx)
+      return this.buildConst(ctx);
     } else {
       // When it's wrapped with parentheses
-      return this.visit(ctx.expression)
+      return this.visit(ctx.expression);
     }
   }
 
-  private buildConst(ctx: any): PExpression {
+  private buildConst(ctx: any): IPExpression {
     return {
       type: "number",
-      value: parseInt(ctx.Const[0].image) // TODO: It's not always an integer
-    }
+      value: parseInt(ctx.Const[0].image, 10), // TODO: It's not always an integer
+    };
   }
 }

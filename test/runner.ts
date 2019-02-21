@@ -1,17 +1,18 @@
-import { TapBark } from "tap-bark"
-import { TestSet, TestRunner } from "alsatian"
-;(async () => {
-  const testSet = TestSet.create()
-  testSet.addTestsFromFiles("./**/*.spec.ts")
+import { TestRunner, TestSet } from "alsatian";
+import { TapBark } from "tap-bark";
 
-  const testRunner = new TestRunner()
+(async () => {
+  const testSet = TestSet.create();
+  testSet.addTestsFromFiles("./**/*.spec.ts");
+
+  const testRunner = new TestRunner();
 
   testRunner.outputStream
     .pipe(TapBark.create().getPipeable())
-    .pipe(process.stdout)
+    .pipe(process.stdout);
 
-  await testRunner.run(testSet)
-})().catch(e => {
-  console.error("FAIL:", e)
-  process.exit(1)
-})
+  await testRunner.run(testSet);
+})().catch((e) => {
+  console.error("FAIL:", e);
+  process.exit(1);
+});

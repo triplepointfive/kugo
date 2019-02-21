@@ -12,7 +12,8 @@
     "typescript": "^3.3.1"
   },
   "scripts": {
-    "test": "ts-node test/runner.ts"
+    "test": "ts-node test/runner.ts",
+    "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts' --fix"
   },
   "dependencies": {
     "chevrotain": "^4.2.0",

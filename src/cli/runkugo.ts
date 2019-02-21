@@ -1,28 +1,27 @@
-import fs from "fs"
-import yargs from "yargs"
+import fs from "fs";
+import yargs from "yargs";
 
-import { builtInContext } from ".."
-import { buildAst } from "../core/AST"
-import { parseKugoFile } from "../parser"
+import { builtInContext } from "..";
+import { buildAst } from "../core/AST";
+import { parseKugoFile } from "../parser";
 
 const clo = yargs
-    .scriptName("runkugo")
-    .usage("Usage: $0 file")
-    .string("_"),
-  files = clo.argv._
+  .scriptName("runkugo")
+  .usage("Usage: $0 file")
+  .string("_");
+const files = clo.argv._;
 
 if (files.length === 1) {
-  const file = fs.readFileSync(files[0]).toString(),
-    parsedAst = parseKugoFile(file).ast,
-    ctx = buildAst(builtInContext, parsedAst),
-    main = ctx.lookupFunction("main")
+  const file = fs.readFileSync(files[0]).toString();
+  const parsedAst = parseKugoFile(file).ast;
+  const ctx = buildAst(builtInContext, parsedAst);
+  const main = ctx.lookupFunction("main");
 
   if (main) {
-    const resp = main.body.eval(ctx)
-    console.log(resp)
+    console.log(main.body.eval(ctx));
   } else {
-    console.error("Function main is not found")
+    console.error("Function main is not found");
   }
 } else {
-  clo.showHelp()
+  clo.showHelp();
 }
