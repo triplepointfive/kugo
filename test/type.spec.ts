@@ -1,7 +1,5 @@
-import {
-  IntegerNumberInterval,
-  IntegerNumberType,
-} from "../src/core/Type/Meta";
+import { IntegerNumberInterval } from "../src/core/Type/Integral/IntegerNumberInterval";
+import { IntegerNumberType } from "../src/core/Type/Integral/IntegerNumberType";
 
 describe("IntegerNumberInterval", () => {
   it("display", () => {

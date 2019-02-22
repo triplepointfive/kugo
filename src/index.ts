@@ -1,13 +1,14 @@
 import { Body, IFunctionAnnotation, Value } from "./core/AST";
 import { Context } from "./core/Context";
-import { IntegerNumberInterval, IntegerNumberType } from "./core/Type/Meta";
+import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterval";
+import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
 
 const buildBody = (f: any, ...names: string[]): Body => {
   return (ctx: Context): Value | Error[] => {
     const missed: string[] = [];
     const values: Value[] = [];
 
-    names.forEach((name) => {
+    names.forEach(name => {
       // TODO: Check whether it can be not-local
       const val = ctx.lookupLocal(name);
 
@@ -19,7 +20,7 @@ const buildBody = (f: any, ...names: string[]): Body => {
     });
 
     if (missed.length) {
-      return missed.map((name) => new Error(`Function ${name} not found`));
+      return missed.map(name => new Error(`Function ${name} not found`));
     }
 
     return f.apply(null, values);
@@ -44,7 +45,7 @@ export const divBody: IFunctionAnnotation = {
     ],
   ],
   body: {
-    eval: (ctx) =>
+    eval: ctx =>
       buildBody((a: Value, b: Value) => Math.floor(a / b), "a", "b")(ctx),
   },
   returnType: inf,
@@ -52,27 +53,27 @@ export const divBody: IFunctionAnnotation = {
 export const substBody: IFunctionAnnotation = {
   args: [["a", inf], ["b", inf]],
   body: {
-    eval: (ctx) => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx),
+    eval: ctx => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx),
   },
   returnType: inf,
 };
 export const sumBody: IFunctionAnnotation = {
   args: [["a", inf], ["b", inf]],
   body: {
-    eval: (ctx) => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx),
+    eval: ctx => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx),
   },
   returnType: inf,
 };
 export const prodBody: IFunctionAnnotation = {
   args: [["a", inf], ["b", inf]],
   body: {
-    eval: (ctx) => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx),
+    eval: ctx => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx),
   },
   returnType: inf,
 };
 export const absBody: IFunctionAnnotation = {
   args: [["v", inf]],
-  body: { eval: (ctx) => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
+  body: { eval: ctx => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
   returnType: {
     options: [
       new IntegerNumberType([new IntegerNumberInterval({ bottom: 0 })]),

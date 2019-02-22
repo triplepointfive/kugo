@@ -1,11 +1,10 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rulesDirectory": [],
-    "rules": {
-        "no-console": false
-    }
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended"],
+  "jsRules": {},
+  "rulesDirectory": [],
+  "rules": {
+    "no-console": false,
+    "arrow-parens": [true, "ban-single-arg-parens"]
+  }
 }

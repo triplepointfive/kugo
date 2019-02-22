@@ -18,7 +18,7 @@ export class Context {
     const type: IMetaType = { options: [] };
 
     // TODO: Allow to use not yet defined function
-    pApp.functionDeclarations.forEach((fd) => {
+    pApp.functionDeclarations.forEach(fd => {
       if (this.lookupFunction(fd.name)) {
         // TODO throw already defined
       }
@@ -68,12 +68,12 @@ const buildBody = (exp: IPExpression): Body => {
         const ctxFunction = ctx.lookupFunction(exp.name);
 
         if (ctxFunction) {
-          const mValues = exp.args.map((arg) => buildBody(arg)(ctx));
+          const mValues = exp.args.map(arg => buildBody(arg)(ctx));
 
           let valueErrors: Error[] = [];
           const values: Value[] = [];
 
-          mValues.forEach((val) => {
+          mValues.forEach(val => {
             if (val instanceof Array) {
               valueErrors = valueErrors.concat(val);
             } else {

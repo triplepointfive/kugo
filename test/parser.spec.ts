@@ -49,7 +49,11 @@ describe("Parser", () => {
       [
         "avg a b = div sum a b",
         app(
-          f("avg", ["a", "b"], call("div", [call("sum"), call("a"), call("b")])),
+          f(
+            "avg",
+            ["a", "b"],
+            call("div", [call("sum"), call("a"), call("b")]),
+          ),
         ),
       ],
       [
