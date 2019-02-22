@@ -2,6 +2,7 @@ import { Body, IFunctionAnnotation, Value } from "./core/AST";
 import { Context } from "./core/Context";
 import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
+import { Natural0NumberType } from "./core/Type/Integral/Natural0NumberType";
 
 const buildBody = (f: any, ...names: string[]): Body => {
   return (ctx: Context): Value | Error[] => {
@@ -75,9 +76,7 @@ export const absBody: IFunctionAnnotation = {
   args: [["v", inf]],
   body: { eval: ctx => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
   returnType: {
-    options: [
-      new IntegerNumberType([new IntegerNumberInterval({ bottom: 0 })]),
-    ],
+    options: [new Natural0NumberType()],
   },
 };
 

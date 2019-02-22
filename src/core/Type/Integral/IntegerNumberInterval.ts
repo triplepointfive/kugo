@@ -1,6 +1,7 @@
 export class IntegerNumberInterval {
   public readonly bottom?: number;
   public readonly upper?: number;
+
   constructor({
     bottom,
     upper,
@@ -11,6 +12,7 @@ export class IntegerNumberInterval {
     this.bottom = bottom;
     this.upper = upper;
   }
+
   public intersection(
     interval: IntegerNumberInterval,
   ): IntegerNumberInterval | undefined {
@@ -27,7 +29,12 @@ export class IntegerNumberInterval {
     }
     return new IntegerNumberInterval({ bottom, upper });
   }
+
   public display(): string {
+    if (this.bottom && this.bottom === this.upper) {
+      return `${this.bottom}`;
+    }
+
     return `${this.bottom ? "[" : "("}${this.bottom ? this.bottom : "-∞"}, ${
       this.upper ? this.upper : "+∞"
     }${this.upper ? "]" : ")"}`;
