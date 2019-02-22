@@ -1,7 +1,7 @@
 import { Context } from "../Context";
-import { Type } from "../Type";
+import { IMetaType } from "../Type/Meta";
 
-export type Arg = [string, Type];
+export type Arg = [string, IMetaType];
 
 export type Value = number;
 export type Body = (ctx: Context) => Value | Error[];
@@ -12,6 +12,6 @@ export interface INExpression {
 
 export interface IFunctionAnnotation {
   args: Arg[];
-  returnType: Type;
+  returnType: IMetaType;
   body: INExpression;
 }

@@ -5,7 +5,7 @@ export class NCall implements INExpression {
   constructor(
     public readonly name: string,
     public readonly args: [INExpression],
-  ) { }
+  ) {}
 
   public eval(context: Context): Value | Error[] {
     return context.lookupLocal(this.name) || this.buildMethod(context);

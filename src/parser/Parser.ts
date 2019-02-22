@@ -10,7 +10,6 @@ import {
 } from "./Lexer";
 
 export class KugoParser extends Parser {
-
   public app = this.RULE("app", () => {
     this.MANY1({
       DEF: () => this.CONSUME1(NewLine),

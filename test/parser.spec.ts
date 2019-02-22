@@ -48,7 +48,10 @@ describe("Parser", () => {
     const cases: Array<[string, IPApp]> = [
       [
         "avg a b = div sum a b",
-        app(f("avg", ["a", "b"], call("div", [call("sum"), call("a"), call("b")])))],
+        app(
+          f("avg", ["a", "b"], call("div", [call("sum"), call("a"), call("b")])),
+        ),
+      ],
       [
         "avg a b = div (sum a b) 2",
         app(
@@ -59,18 +62,10 @@ describe("Parser", () => {
           ),
         ),
       ],
-      ["three   =3", app(f("three", [], cons(3))),
-
-      ],
-      ["fst a b = (a )", app(fst),
-
-      ],
-      ["snd a b = b", app(snd),
-
-      ],
-      [`\n  \nfst a b = a\n\nsnd a b = b\n  \n `, apps([fst, snd]),
-
-      ],
+      ["three   =3", app(f("three", [], cons(3)))],
+      ["fst a b = (a )", app(fst)],
+      ["snd a b = b", app(snd)],
+      [`\n  \nfst a b = a\n\nsnd a b = b\n  \n `, apps([fst, snd])],
     ];
 
     cases.forEach(([file, ast]) => {

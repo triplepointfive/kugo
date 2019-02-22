@@ -1,7 +1,6 @@
-import { inf } from "..";
 import { IPApp, IPExpression } from "../parser/AST";
 import { Arg, Body, IFunctionAnnotation, INExpression, Value } from "./AST";
-import { NumberInterval } from "./Type";
+import { IMetaType } from "./Type/Meta";
 
 export type FunctionsTable = Map<string, IFunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
@@ -10,13 +9,13 @@ export class Context {
   constructor(
     private readonly global: FunctionsTable,
     private readonly local: ArgsTable,
-  ) { }
+  ) {}
 
   public extend(pApp: IPApp): Context {
     const ext: FunctionsTable = new Map();
 
     // TODO: Build and check types
-    const type = [new NumberInterval(inf, inf)];
+    const type: IMetaType = { options: [] };
 
     // TODO: Allow to use not yet defined function
     pApp.functionDeclarations.forEach((fd) => {
