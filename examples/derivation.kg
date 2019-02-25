@@ -1,0 +1,5 @@
+three = 3
+
+addThree x = sum x three
+
+main = addThree 5

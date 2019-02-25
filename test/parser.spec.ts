@@ -1,5 +1,9 @@
 import { parseKugoFile } from "../src/parser";
-import { IPApp, IPExpression, IPFunctionDeclaration } from "../src/parser/AST";
+import { IPApp } from "../src/parser/AST";
+import { CallPExpression } from "../src/parser/AST/CallPExpression";
+import { IPFunctionDeclaration } from "../src/parser/AST/IPFunctionDeclaration";
+import { NumberPExpression } from "../src/parser/AST/NumberPExpression";
+import { PExpression } from "../src/parser/AST/PExpression";
 
 const app = (fun: IPFunctionDeclaration): IPApp => {
   return {
@@ -16,28 +20,17 @@ const apps = (functionDeclarations: IPFunctionDeclaration[]): IPApp => {
 const f = (
   name: string,
   args: string[],
-  expression: IPExpression,
+  expression: PExpression,
 ): IPFunctionDeclaration => {
-  return {
-    args,
-    expression,
-    name,
-  };
+  return new IPFunctionDeclaration(name, args, expression);
 };
 
-const call = (name: string, args: IPExpression[] = []): IPExpression => {
-  return {
-    args,
-    name,
-    type: "call",
-  };
+const call = (name: string, args: PExpression[] = []): PExpression => {
+  return new CallPExpression(name, args);
 };
 
-const cons = (value: number): IPExpression => {
-  return {
-    type: "number",
-    value,
-  };
+const cons = (value: number): PExpression => {
+  return new NumberPExpression(value);
 };
 
 const fst = f("fst", ["a", "b"], call("a", []));

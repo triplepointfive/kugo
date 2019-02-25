@@ -20,8 +20,8 @@ describe("IntegerNumberInterval", () => {
       const cases: Array<[any, string]> = [
         [{ upper: 5 }, "(-∞, 5]"],
         [{ bottom: 1, upper: 5 }, "[1, 5]"],
-        [{ bottom: 5, upper: 5 }, "[5, 5]"],
-        [{ bottom: 5 }, "[5, 5]"],
+        [{ bottom: 5, upper: 5 }, "5"],
+        [{ bottom: 5 }, "5"],
       ];
 
       cases.forEach(([interval, expected]) => {

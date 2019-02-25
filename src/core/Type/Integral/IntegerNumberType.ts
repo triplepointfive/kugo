@@ -1,5 +1,6 @@
-import { NumberType } from "../Meta";
+import { NumberType } from "../NumberType";
 import { IntegerNumberInterval } from "./IntegerNumberInterval";
+
 export class IntegerNumberType extends NumberType {
   constructor(public readonly bounds: IntegerNumberInterval[] = []) {
     super();

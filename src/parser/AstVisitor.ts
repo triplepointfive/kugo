@@ -1,5 +1,9 @@
 import { tail } from "lodash";
-import { IPApp, IPExpression, IPFunctionDeclaration } from "./AST";
+import { IPApp } from "./AST";
+import { CallPExpression } from "./AST/CallPExpression";
+import { IPFunctionDeclaration } from "./AST/IPFunctionDeclaration";
+import { NumberPExpression } from "./AST/NumberPExpression";
+import { PExpression } from "./AST/PExpression";
 import { KugoParser } from "./Parser";
 
 const parserInstance = new KugoParser();
@@ -20,14 +24,14 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
   }
 
   public functionDeclaration(ctx: any): IPFunctionDeclaration {
-    return {
-      args: tail(ctx.Identity).map((token: any): string => token.image),
-      expression: this.visit(ctx.expression),
-      name: ctx.Identity[0].image,
-    };
+    return new IPFunctionDeclaration(
+      ctx.Identity[0].image,
+      tail(ctx.Identity).map((token: any): string => token.image),
+      this.visit(ctx.expression),
+    );
   }
 
-  public expression(ctx: any): IPExpression {
+  public expression(ctx: any): PExpression {
     if (ctx.functionCall) {
       return this.visit(ctx.functionCall);
     } else if (ctx.Const) {
@@ -38,21 +42,16 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
     }
   }
 
-  public functionCall(ctx: any): IPExpression {
-    return {
-      args: (ctx.functionArg || []).map((exp: any) => this.visit(exp)),
-      name: ctx.Identity[0].image,
-      type: "call",
-    };
+  public functionCall(ctx: any): PExpression {
+    return new CallPExpression(
+      ctx.Identity[0].image,
+      (ctx.functionArg || []).map((exp: any) => this.visit(exp)),
+    );
   }
 
-  public functionArg(ctx: any): IPExpression {
+  public functionArg(ctx: any): PExpression {
     if (ctx.Identity) {
-      return {
-        args: [],
-        name: ctx.Identity[0].image,
-        type: "call",
-      };
+      return new CallPExpression(ctx.Identity[0].image, []);
     } else if (ctx.Const) {
       return this.buildConst(ctx);
     } else {
@@ -61,10 +60,8 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
     }
   }
 
-  private buildConst(ctx: any): IPExpression {
-    return {
-      type: "number",
-      value: parseInt(ctx.Const[0].image, 10), // TODO: It's not always an integer
-    };
+  private buildConst(ctx: any): PExpression {
+    // TODO: It's not always an integer
+    return new NumberPExpression(parseInt(ctx.Const[0].image, 10));
   }
 }

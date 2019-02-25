@@ -6,5 +6,3 @@ export interface IMetaType {
 export abstract class BaseType {
   public abstract display(): string;
 }
-
-export abstract class NumberType extends BaseType {}
