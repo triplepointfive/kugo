@@ -5,6 +5,7 @@ export class IntegerNumberType extends NumberType {
   constructor(public readonly bounds: IntegerNumberInterval[] = []) {
     super();
   }
+
   public merge({ bounds }: IntegerNumberType): IntegerNumberType {
     const resultSet: IntegerNumberInterval[] = [];
     this.bounds.forEach(interval1 => {
@@ -18,6 +19,7 @@ export class IntegerNumberType extends NumberType {
     // TODO: Add normalization
     return new IntegerNumberType(resultSet);
   }
+
   public display(): string {
     if (this.bounds.length === 0) {
       return "ℤ";

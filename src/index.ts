@@ -29,11 +29,11 @@ const buildBody = (f: any, ...names: string[]): Body => {
   };
 };
 
-const inf = { options: [new IntegerNumberType()] };
+export const Z = { options: [new IntegerNumberType()] };
 
 export const divBody: FunctionAnnotation = new FunctionAnnotation(
   [
-    ["a", inf],
+    ["a", Z],
     [
       "b",
       {
@@ -46,35 +46,35 @@ export const divBody: FunctionAnnotation = new FunctionAnnotation(
       },
     ],
   ],
-  inf,
+  Z,
   {
     eval: ctx =>
       buildBody((a: Value, b: Value) => Math.floor(a / b), "a", "b")(ctx),
   },
 );
 export const substBody: FunctionAnnotation = new FunctionAnnotation(
-  [["a", inf], ["b", inf]],
-  inf,
+  [["a", Z], ["b", Z]],
+  Z,
   {
     eval: ctx => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx),
   },
 );
 export const sumBody: FunctionAnnotation = new FunctionAnnotation(
-  [["a", inf], ["b", inf]],
-  inf,
+  [["a", Z], ["b", Z]],
+  Z,
   {
     eval: ctx => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx),
   },
 );
 export const prodBody: FunctionAnnotation = new FunctionAnnotation(
-  [["a", inf], ["b", inf]],
-  inf,
+  [["a", Z], ["b", Z]],
+  Z,
   {
     eval: ctx => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx),
   },
 );
 export const absBody: FunctionAnnotation = new FunctionAnnotation(
-  [["v", inf]],
+  [["v", Z]],
   {
     options: [new Natural0NumberType()],
   },

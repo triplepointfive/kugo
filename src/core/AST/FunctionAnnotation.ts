@@ -14,7 +14,7 @@ export class FunctionAnnotation {
         .map(([name, meta]) =>
           meta.options.map(type => type.display()).join(" ∪ "),
         )
-        .join(" -> ")} -> ${this.returnType.options[0].display()}`;
+        .join(" → ")} → ${this.returnType.options[0].display()}`;
     } else {
       return this.returnType.options[0].display();
     }
