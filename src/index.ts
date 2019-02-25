@@ -1,4 +1,5 @@
-import { Body, IFunctionAnnotation, Value } from "./core/AST";
+import { Body, Value } from "./core/AST";
+import { FunctionAnnotation } from "./core/AST/FunctionAnnotation";
 import { Context } from "./core/Context";
 import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
@@ -30,8 +31,8 @@ const buildBody = (f: any, ...names: string[]): Body => {
 
 const inf = { options: [new IntegerNumberType()] };
 
-export const divBody: IFunctionAnnotation = {
-  args: [
+export const divBody: FunctionAnnotation = new FunctionAnnotation(
+  [
     ["a", inf],
     [
       "b",
@@ -45,42 +46,42 @@ export const divBody: IFunctionAnnotation = {
       },
     ],
   ],
-  body: {
+  inf,
+  {
     eval: ctx =>
       buildBody((a: Value, b: Value) => Math.floor(a / b), "a", "b")(ctx),
   },
-  returnType: inf,
-};
-export const substBody: IFunctionAnnotation = {
-  args: [["a", inf], ["b", inf]],
-  body: {
+);
+export const substBody: FunctionAnnotation = new FunctionAnnotation(
+  [["a", inf], ["b", inf]],
+  inf,
+  {
     eval: ctx => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx),
   },
-  returnType: inf,
-};
-export const sumBody: IFunctionAnnotation = {
-  args: [["a", inf], ["b", inf]],
-  body: {
+);
+export const sumBody: FunctionAnnotation = new FunctionAnnotation(
+  [["a", inf], ["b", inf]],
+  inf,
+  {
     eval: ctx => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx),
   },
-  returnType: inf,
-};
-export const prodBody: IFunctionAnnotation = {
-  args: [["a", inf], ["b", inf]],
-  body: {
+);
+export const prodBody: FunctionAnnotation = new FunctionAnnotation(
+  [["a", inf], ["b", inf]],
+  inf,
+  {
     eval: ctx => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx),
   },
-  returnType: inf,
-};
-export const absBody: IFunctionAnnotation = {
-  args: [["v", inf]],
-  body: { eval: ctx => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
-  returnType: {
+);
+export const absBody: FunctionAnnotation = new FunctionAnnotation(
+  [["v", inf]],
+  {
     options: [new Natural0NumberType()],
   },
-};
+  { eval: ctx => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
+);
 
-export const builtInFunctions: Map<string, IFunctionAnnotation> = new Map([
+export const builtInFunctions: Map<string, FunctionAnnotation> = new Map([
   ["sum", sumBody],
   ["prod", prodBody],
   ["subst", substBody],

@@ -1,7 +1,7 @@
 import { tail } from "lodash";
 import { IPApp } from "./AST";
 import { CallPExpression } from "./AST/CallPExpression";
-import { IPFunctionDeclaration } from "./AST/IPFunctionDeclaration";
+import { PFunctionDeclaration } from "./AST/IPFunctionDeclaration";
 import { NumberPExpression } from "./AST/NumberPExpression";
 import { PExpression } from "./AST/PExpression";
 import { KugoParser } from "./Parser";
@@ -23,8 +23,8 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
     };
   }
 
-  public functionDeclaration(ctx: any): IPFunctionDeclaration {
-    return new IPFunctionDeclaration(
+  public functionDeclaration(ctx: any): PFunctionDeclaration {
+    return new PFunctionDeclaration(
       ctx.Identity[0].image,
       tail(ctx.Identity).map((token: any): string => token.image),
       this.visit(ctx.expression),

@@ -18,7 +18,7 @@ if (files.length === 1) {
 
   if (main) {
     ctx.global.forEach((fd, name) => {
-      console.log(`${name} : `, fd.returnType.options[0].display());
+      console.log(`${name} : ${fd.displayType()}`);
     });
     console.log("Running");
     console.log(main.body.eval(ctx));

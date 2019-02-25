@@ -1,7 +1,8 @@
 import { IPApp } from "../parser/AST";
-import { IFunctionAnnotation, INExpression, Value } from "./AST";
+import { INExpression, Value } from "./AST";
+import { FunctionAnnotation } from "./AST/FunctionAnnotation";
 
-export type FunctionsTable = Map<string, IFunctionAnnotation>;
+export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
 
 export class Context {
@@ -33,7 +34,7 @@ export class Context {
     return expression.eval(this);
   }
 
-  public lookupFunction(name: string): IFunctionAnnotation | undefined {
+  public lookupFunction(name: string): FunctionAnnotation | undefined {
     return this.global.get(name);
   }
 

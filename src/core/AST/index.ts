@@ -9,9 +9,3 @@ export type Body = (ctx: Context) => Value | Error[];
 export interface INExpression {
   eval: Body;
 }
-
-export interface IFunctionAnnotation {
-  args: Arg[];
-  returnType: IMetaType;
-  body: INExpression;
-}
