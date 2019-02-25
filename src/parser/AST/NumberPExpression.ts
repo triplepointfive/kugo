@@ -9,11 +9,13 @@ export class NumberPExpression extends PExpression {
   constructor(public readonly value: number) {
     super();
   }
+
   public build(): Body {
     return (ctx: Context): Value | Error[] => {
       return this.value;
     };
   }
+
   public type(): IMetaType {
     return {
       options: [
@@ -25,5 +27,9 @@ export class NumberPExpression extends PExpression {
         ]),
       ],
     };
+  }
+
+  public buildArgTypes(): void {
+    return;
   }
 }

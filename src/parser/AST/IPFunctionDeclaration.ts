@@ -11,9 +11,11 @@ export class PFunctionDeclaration {
   ) {}
 
   public build(global: Context, module: FunctionsTable): void {
-    // TODO: Build and check types
     const args = this.args.map((name: string): Arg => [name, { options: [] }]);
-    // TODO: Sadly, context required here to determine ret type
+
+    // TODO: Pass FunctionAnnotation as last argument to allow self-type derivation
+    this.expression.buildArgTypes(global, module, args);
+
     module.set(
       this.name,
       new FunctionAnnotation(args, this.expression.type(global, module), {
