@@ -1,4 +1,4 @@
-import { IntegerNumberInterval, IntegerNumberType } from "../src";
+import { IntegerNumberInterval } from "../../../../src";
 
 describe("IntegerNumberInterval", () => {
   it("display", () => {
@@ -65,34 +65,5 @@ describe("IntegerNumberInterval", () => {
 
       expect(range && range.display()).toBe("(-∞, +∞)");
     });
-  });
-});
-
-describe("IntegerNumberType", () => {
-  it("displayNumberBound", () => {
-    const numberSet: IntegerNumberType = new IntegerNumberType([
-      new IntegerNumberInterval({ upper: 3 }),
-      new IntegerNumberInterval({ bottom: 3 }),
-    ]);
-    const expected: string = "(-∞, 3] ∪ [3, +∞)";
-
-    expect(numberSet.display()).toBe(expected);
-  });
-
-  it("mergeNumberBounds", () => {
-    const a = new IntegerNumberType([
-      new IntegerNumberInterval({ upper: 5 }),
-      new IntegerNumberInterval({ bottom: 10 }),
-    ]);
-    const b = new IntegerNumberType([
-      new IntegerNumberInterval({ bottom: 3, upper: 11 }),
-    ]);
-
-    expect(a.merge(b)).toEqual(
-      new IntegerNumberType([
-        new IntegerNumberInterval({ bottom: 3, upper: 5 }),
-        new IntegerNumberInterval({ bottom: 10, upper: 11 }),
-      ]),
-    );
   });
 });

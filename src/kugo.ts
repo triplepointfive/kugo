@@ -30,7 +30,9 @@ const buildBody = (f: any, ...names: string[]): Body => {
   };
 };
 
-export const Z = new UnionMetaType([new IntegerNumberType()]);
+export const Z = new UnionMetaType([
+  new IntegerNumberType([new IntegerNumberInterval()]),
+]);
 
 export const divBody: FunctionAnnotation = new FunctionAnnotation(
   [

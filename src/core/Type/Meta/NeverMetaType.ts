@@ -1,4 +1,5 @@
 import { MetaType } from ".";
+import { BaseType } from "../BaseType";
 
 export class NeverMetaType extends MetaType {
   public union(type: MetaType): MetaType {
@@ -6,6 +7,10 @@ export class NeverMetaType extends MetaType {
   }
 
   public intersect(type: MetaType): MetaType {
+    return this;
+  }
+
+  public intersectType(type: BaseType): MetaType {
     return this;
   }
 

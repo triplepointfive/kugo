@@ -1,3 +1,4 @@
+import { BaseTypeVisitor } from "../BaseTypeVisitor";
 import { NumberType } from "../NumberType";
 import { IntegerNumberInterval } from "./IntegerNumberInterval";
 
@@ -6,24 +7,20 @@ export class IntegerNumberType extends NumberType {
     super();
   }
 
-  public merge({ bounds }: IntegerNumberType): IntegerNumberType {
-    const resultSet: IntegerNumberInterval[] = [];
-    this.bounds.forEach(interval1 => {
-      bounds.forEach(interval2 => {
-        const intersection = interval1.intersection(interval2);
-        if (intersection) {
-          resultSet.push(intersection);
-        }
-      });
-    });
-    // TODO: Add normalization
-    return new IntegerNumberType(resultSet);
+  public visit<T>(visitor: BaseTypeVisitor<T>): T {
+    return visitor.visitIntegral(this);
   }
 
   public display(): string {
+    // EXTRA: Should never get here
     if (this.bounds.length === 0) {
       return "ℤ";
     }
+
+    if (!this.bounds[0].bottom && !this.bounds[0].upper) {
+      return "ℤ";
+    }
+
     return this.bounds.map(b => b.display()).join(" ∪ ");
   }
 }
