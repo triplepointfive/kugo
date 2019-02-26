@@ -16,11 +16,15 @@ name = string
 
 ## Type
 
-On top level, every type is a union of 1 or more primary types.
+There are three main types:
 
-## Primary types
+1. `any` represents that value of any type is allowed. Generally, this is unused arguments.
+2. `never` means there is no values which can fit this type. This is an error.
+3. And a union of 1 or more basic types. Values belong to any of its types.
 
-### Integer
+### Basic types
+
+#### Integer
 
 Integers are the natural numbers and their negatives `{... −3, −2, −1, 0, 1, 2, 3, ...}`
 

@@ -1,7 +1,10 @@
-import { builtInContext, Z } from "../../../src";
-import { PFunctionDeclaration } from "../../../src/parser/AST/IPFunctionDeclaration";
-import { CallPExpression } from "../../../src/parser/AST/CallPExpression";
-import { NumberPExpression } from "../../../src/parser/AST/NumberPExpression";
+import {
+  builtInContext,
+  CallPExpression,
+  NumberPExpression,
+  PFunctionDeclaration,
+  Z,
+} from "../../../src";
 
 describe("PFunctionDeclaration", () => {
   it("deriving return type", () => {

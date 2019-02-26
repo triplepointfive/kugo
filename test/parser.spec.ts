@@ -1,9 +1,11 @@
-import { parseKugoFile } from "../src/parser";
-import { IPApp } from "../src/parser/AST";
-import { CallPExpression } from "../src/parser/AST/CallPExpression";
-import { PFunctionDeclaration } from "../src/parser/AST/IPFunctionDeclaration";
-import { NumberPExpression } from "../src/parser/AST/NumberPExpression";
-import { PExpression } from "../src/parser/AST/PExpression";
+import {
+  CallPExpression,
+  IPApp,
+  NumberPExpression,
+  parseKugoFile,
+  PExpression,
+  PFunctionDeclaration,
+} from "../src";
 
 const app = (fun: PFunctionDeclaration): IPApp => {
   return {

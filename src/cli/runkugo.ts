@@ -1,7 +1,7 @@
 import fs from "fs";
 import yargs from "yargs";
 
-import { builtInContext } from "..";
+import { builtInContext } from "../kugo";
 import { parseKugoFile } from "../parser";
 
 const clo = yargs

@@ -1,7 +1,7 @@
 import { Arg, Body, FunctionArgs, Value } from "../../core/AST";
 import { FunctionAnnotation } from "../../core/AST/FunctionAnnotation";
 import { ArgsTable, Context, FunctionsTable } from "../../core/Context";
-import { IMetaType } from "../../core/Type/Meta";
+import { MetaType } from "../../core/Type/Meta";
 import { PExpression } from "./PExpression";
 
 export class CallPExpression extends PExpression {
@@ -53,7 +53,7 @@ export class CallPExpression extends PExpression {
     };
   }
 
-  public type(ctx: Context, ext: FunctionsTable): IMetaType {
+  public type(ctx: Context, ext: FunctionsTable): MetaType {
     const expFunctionAnnotation =
       ext.get(this.name) || ctx.lookupFunction(this.name);
 
@@ -73,12 +73,11 @@ export class CallPExpression extends PExpression {
   ): void {
     if (annotation !== undefined && index !== undefined) {
       if (this.args.length === 0) {
-        const type = functionArgs.find(([name, _]) => name === this.name);
-
-        if (type) {
-          // TODO: Intersect types here
-          type[1].options = annotation.args[index][1].options;
-        }
+        functionArgs.forEach(arg => {
+          if (arg[0] === this.name) {
+            arg[1] = arg[1].intersect(annotation.args[index][1]);
+          }
+        });
       }
     }
 

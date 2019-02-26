@@ -1,6 +1,7 @@
 import { Arg } from "../../core/AST";
 import { FunctionAnnotation } from "../../core/AST/FunctionAnnotation";
 import { Context, FunctionsTable } from "../../core/Context";
+import { AnyMetaType } from "../../core/Type/Meta/AnyMetaType";
 import { PExpression } from "./PExpression";
 
 export class PFunctionDeclaration {
@@ -11,7 +12,9 @@ export class PFunctionDeclaration {
   ) {}
 
   public build(global: Context, module: FunctionsTable): void {
-    const args = this.args.map((name: string): Arg => [name, { options: [] }]);
+    const args = this.args.map(
+      (name: string): Arg => [name, new AnyMetaType()],
+    );
 
     // TODO: Pass FunctionAnnotation as last argument to allow self-type derivation
     this.expression.buildArgTypes(global, module, args);

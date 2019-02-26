@@ -1,8 +1,8 @@
 import fs from "fs";
 import readline from "readline";
 
-import { builtInFunctions } from "..";
 import { Context } from "../core/Context";
+import { builtInFunctions } from "../kugo";
 import { parseKugoFile } from "../parser";
 
 const ctx = new Context(builtInFunctions, new Map());

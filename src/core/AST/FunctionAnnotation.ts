@@ -1,22 +1,20 @@
-import { Arg, INExpression } from ".";
-import { IMetaType } from "../Type/Meta";
+import { FunctionArgs, INExpression } from ".";
+import { MetaType } from "../Type/Meta";
 
 export class FunctionAnnotation {
   constructor(
-    public readonly args: Arg[],
-    public readonly returnType: IMetaType,
+    public readonly args: FunctionArgs,
+    public readonly returnType: MetaType,
     public readonly body: INExpression,
   ) {}
 
   public displayType(): string {
     if (this.args.length) {
       return `${this.args
-        .map(([name, meta]) =>
-          meta.options.map(type => type.display()).join(" ∪ "),
-        )
-        .join(" → ")} → ${this.returnType.options[0].display()}`;
+        .map(([_, meta]) => meta.display())
+        .join(" → ")} → ${this.returnType.display()}`;
     } else {
-      return this.returnType.options[0].display();
+      return this.returnType.display();
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Context } from "../Context";
-import { IMetaType } from "../Type/Meta";
+import { MetaType } from "../Type/Meta";
 
-export type Arg = [string, IMetaType];
+export type Arg = [string, MetaType];
 export type FunctionArgs = Arg[];
 
 export type Value = number;
