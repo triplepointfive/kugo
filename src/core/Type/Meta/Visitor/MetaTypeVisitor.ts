@@ -1,6 +1,6 @@
-import { UnionMetaType } from "../UnionMetaType";
-import { NeverMetaType } from "../NeverMetaType";
 import { AnyMetaType } from "../AnyMetaType";
+import { NeverMetaType } from "../NeverMetaType";
+import { UnionMetaType } from "../UnionMetaType";
 
 export abstract class MetaTypeVisitor<T> {
   public abstract visitUnion(type: UnionMetaType): T;

@@ -1,6 +1,9 @@
-import { MetaTypeVisitor } from "./MetaTypeVisitor";
-import { UnionMetaType, NeverMetaType, AnyMetaType } from "../../../..";
 import { MetaType } from "..";
+import { AnyMetaType, NeverMetaType, UnionMetaType } from "../../../..";
+import { AnySubsetMetaTypeVisitor } from "./AnySubsetMetaTypeVisitor";
+import { MetaTypeVisitor } from "./MetaTypeVisitor";
+import { NeverSubsetMetaTypeVisitor } from "./NeverSubsetMetaTypeVisitor";
+import { UnionSubsetMetaTypeVisitor } from "./UnionSubsetMetaTypeVisitor";
 
 export class IsSubsetMetaTypeVisitor extends MetaTypeVisitor<
   MetaTypeVisitor<boolean>
@@ -28,62 +31,5 @@ export class IsSubsetMetaTypeVisitor extends MetaTypeVisitor<
 
   public visitAny(dest: AnyMetaType): MetaTypeVisitor<boolean> {
     return new AnySubsetMetaTypeVisitor(dest);
-  }
-}
-
-class NeverSubsetMetaTypeVisitor extends MetaTypeVisitor<boolean> {
-  constructor(private origin: NeverMetaType) {
-    super();
-  }
-
-  public visitUnion(dest: UnionMetaType): boolean {
-    return true;
-  }
-
-  public visitNever(dest: NeverMetaType): boolean {
-    return true;
-  }
-
-  public visitAny(dest: AnyMetaType): boolean {
-    return true;
-  }
-}
-
-class AnySubsetMetaTypeVisitor extends MetaTypeVisitor<boolean> {
-  constructor(private origin: AnyMetaType) {
-    super();
-  }
-
-  public visitUnion(dest: UnionMetaType): boolean {
-    return false;
-  }
-
-  public visitNever(dest: NeverMetaType): boolean {
-    return false;
-  }
-
-  public visitAny(dest: AnyMetaType): boolean {
-    return true;
-  }
-}
-
-class UnionSubsetMetaTypeVisitor extends MetaTypeVisitor<boolean> {
-  constructor(private origin: UnionMetaType) {
-    super();
-  }
-
-  public visitUnion(dest: UnionMetaType): boolean {
-    return this.origin.options.every(type => {
-      // TODO: OMG, compare it better
-      return dest.intersectType(type).display() == type.display();
-    });
-  }
-
-  public visitNever(dest: NeverMetaType): boolean {
-    return false;
-  }
-
-  public visitAny(dest: AnyMetaType): boolean {
-    return true;
   }
 }

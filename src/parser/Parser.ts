@@ -64,6 +64,7 @@ export class KugoParser extends Parser {
   private functionArg = this.RULE("functionArg", () => {
     this.OR([
       {
+        // tslint:disable-next-line:no-identical-functions
         ALT: () => {
           this.CONSUME(OpenParentheses);
           this.SUBRULE(this.expression);
@@ -74,6 +75,7 @@ export class KugoParser extends Parser {
       { ALT: () => this.CONSUME(Const) },
     ]);
   });
+
   constructor() {
     super(allTokens);
     this.performSelfAnalysis();

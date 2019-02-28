@@ -73,14 +73,16 @@ export class CallPExpression extends PExpression {
     annotation?: FunctionAnnotation,
     index?: number,
   ): void {
-    if (annotation !== undefined && index !== undefined) {
-      if (this.args.length === 0) {
-        functionArgs.forEach(arg => {
-          if (arg[0] === this.name) {
-            arg[1] = arg[1].intersect(annotation.args[index][1]);
-          }
-        });
-      }
+    if (
+      annotation !== undefined &&
+      index !== undefined &&
+      this.args.length === 0
+    ) {
+      functionArgs.forEach(arg => {
+        if (arg[0] === this.name) {
+          arg[1] = arg[1].intersect(annotation.args[index][1]);
+        }
+      });
     }
 
     const expFunctionAnnotation =
