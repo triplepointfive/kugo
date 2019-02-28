@@ -8,7 +8,6 @@ export * from "./core/Type/Meta/UnionMetaType";
 export * from "./core/Type/BaseType";
 export * from "./core/Type/Integral/IntegerNumberInterval";
 export * from "./core/Type/Integral/IntegerNumberType";
-// export * from "./core/Type/Integral/real";
 export * from "./core/Type/Integral/NaturalNumberType";
 export * from "./core/Type/Integral/Natural0NumberType";
 export * from "./core/AST/NConstant";
