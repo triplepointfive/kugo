@@ -1,5 +1,6 @@
 import { Body, Value } from "../../core/AST";
 import { Context } from "../../core/Context";
+import { KugoError } from "../../core/KugoError";
 import { IntegerNumberInterval } from "../../core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "../../core/Type/Integral/IntegerNumberType";
 import { MetaType } from "../../core/Type/Meta";
@@ -12,7 +13,7 @@ export class NumberPExpression extends PExpression {
   }
 
   public build(): Body {
-    return (ctx: Context): Value | Error[] => {
+    return (ctx: Context): Value | KugoError[] => {
       return this.value;
     };
   }

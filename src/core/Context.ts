@@ -1,6 +1,8 @@
 import { IPApp } from "../parser/AST";
+import { Maybe } from "../utils/Maybe";
 import { INExpression, Value } from "./AST";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
+import { KugoError } from "./KugoError";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
@@ -11,26 +13,31 @@ export class Context {
     public readonly local: ArgsTable,
   ) {}
 
-  public extend(pApp: IPApp): Context {
+  public extend(pApp: IPApp): Maybe<Context> {
     const ext: FunctionsTable = new Map();
 
     // TODO: Allow to use not yet defined function
-    pApp.functionDeclarations.forEach(fd => {
+    for (const fd of pApp.functionDeclarations) {
       if (this.lookupFunction(fd.name)) {
         // TODO throw already defined
       }
 
-      fd.build(this, ext);
-    });
+      const buildErrors = fd.build(this, ext);
+      if (buildErrors) {
+        return new Maybe<Context>(buildErrors);
+      }
+    }
 
-    return new Context(new Map([...this.global, ...ext]), this.local);
+    return new Maybe(
+      new Context(new Map([...this.global, ...ext]), this.local),
+    );
   }
 
   public nest(local: ArgsTable): Context {
     return new Context(this.global, local);
   }
 
-  public evaluate(expression: INExpression): Value | Error[] {
+  public evaluate(expression: INExpression): Value | KugoError[] {
     return expression.eval(this);
   }
 

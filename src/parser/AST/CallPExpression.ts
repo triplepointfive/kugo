@@ -1,6 +1,7 @@
 import { Arg, Body, FunctionArgs, Value } from "../../core/AST";
 import { FunctionAnnotation } from "../../core/AST/FunctionAnnotation";
 import { ArgsTable, Context, FunctionsTable } from "../../core/Context";
+import { KugoError } from "../../core/KugoError";
 import { MetaType } from "../../core/Type/Meta";
 import { PExpression } from "./PExpression";
 
@@ -13,7 +14,7 @@ export class CallPExpression extends PExpression {
   }
 
   public build(): Body {
-    return (ctx: Context): Value | Error[] => {
+    return (ctx: Context): Value | KugoError[] => {
       const localValue = ctx.lookupLocal(this.name);
       // TODO: Check this has no args
       if (localValue) {
@@ -24,7 +25,7 @@ export class CallPExpression extends PExpression {
 
       if (ctxFunction) {
         const mValues = this.args.map(arg => arg.build()(ctx));
-        let valueErrors: Error[] = [];
+        let valueErrors: KugoError[] = [];
         const values: Value[] = [];
 
         mValues.forEach(val => {
@@ -49,18 +50,18 @@ export class CallPExpression extends PExpression {
         );
         return ctxFunction.body.eval(ctx.nest(local));
       }
-      return [new Error(`Function ${this.name} not found`)];
+      return [new KugoError(`Function ${this.name} not found`)];
     };
   }
 
-  public type(ctx: Context, ext: FunctionsTable): MetaType {
+  public type(ctx: Context, ext: FunctionsTable): MetaType | KugoError[] {
     const expFunctionAnnotation =
       ext.get(this.name) || ctx.lookupFunction(this.name);
 
-    // TODO: Build error instead of throwing
     if (!expFunctionAnnotation) {
-      throw new Error(`Failed to obtain type of ${this.name}`);
+      return [new KugoError(`Failed to obtain type of ${this.name}`)];
     }
+
     return expFunctionAnnotation.returnType;
   }
 

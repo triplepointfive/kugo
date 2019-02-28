@@ -1,13 +1,14 @@
 import { Body, Value } from "./core/AST";
 import { FunctionAnnotation } from "./core/AST/FunctionAnnotation";
 import { Context } from "./core/Context";
+import { KugoError } from "./core/KugoError";
 import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
 import { Natural0NumberType } from "./core/Type/Integral/Natural0NumberType";
 import { UnionMetaType } from "./core/Type/Meta/UnionMetaType";
 
 const buildBody = (f: any, ...names: string[]): Body => {
-  return (ctx: Context): Value | Error[] => {
+  return (ctx: Context): Value | KugoError[] => {
     const missed: string[] = [];
     const values: Value[] = [];
 
@@ -23,7 +24,7 @@ const buildBody = (f: any, ...names: string[]): Body => {
     });
 
     if (missed.length) {
-      return missed.map(name => new Error(`Function ${name} not found`));
+      return missed.map(name => new KugoError(`Function ${name} not found`));
     }
 
     return f(...values);

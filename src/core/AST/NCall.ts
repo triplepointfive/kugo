@@ -1,5 +1,6 @@
 import { INExpression, Value } from ".";
 import { Context } from "../Context";
+import { KugoError } from "../KugoError";
 
 export class NCall implements INExpression {
   constructor(
@@ -7,14 +8,14 @@ export class NCall implements INExpression {
     public readonly args: [INExpression],
   ) {}
 
-  public eval(context: Context): Value | Error[] {
+  public eval(context: Context): Value | KugoError[] {
     return context.lookupLocal(this.name) || this.buildMethod(context);
   }
 
-  private buildMethod(context: Context): Value | Error[] {
+  private buildMethod(context: Context): Value | KugoError[] {
     const functionAnnotation = context.lookupFunction(this.name);
     if (functionAnnotation === undefined) {
-      return [new Error(`Unknown function ${this.name}`)];
+      return [new KugoError(`Unknown function ${this.name}`)];
     }
 
     return functionAnnotation.body.eval(context);

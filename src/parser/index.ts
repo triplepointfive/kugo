@@ -21,6 +21,7 @@ export function parseKugoFile(text: string): IParser {
 
   const cst = parser.app();
 
+  // TODO: Build KugoErrors from lex or parse errors
   return {
     ast: toAstVisitorInstance.visit(cst),
     // This is a pure grammar, the value will be undefined until we add embedded actions

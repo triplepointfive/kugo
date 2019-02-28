@@ -14,6 +14,7 @@ export * from "./core/AST/NConstant";
 export * from "./core/AST/FunctionAnnotation";
 export * from "./core/AST/NCall";
 export * from "./core/AST/index";
+export * from "./core/KugoError";
 export * from "./cli/kugoi";
 export * from "./cli/runkugo";
 export * from "./parser/AstVisitor";

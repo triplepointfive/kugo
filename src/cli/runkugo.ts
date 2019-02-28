@@ -13,17 +13,19 @@ const files = clo.argv._;
 if (files.length === 1) {
   const file = fs.readFileSync(files[0]).toString();
   const parsedAst = parseKugoFile(file).ast;
-  const ctx = builtInContext.extend(parsedAst);
-  const main = ctx.lookupFunction("main");
+  const buildCtx = builtInContext.extend(parsedAst);
 
-  if (main) {
-    ctx.global.forEach((fd, name) => {
-      console.log(`${name} : ${fd.displayType()}`);
-    });
-    console.log(main.body.eval(ctx));
-  } else {
-    console.error("Function main is not found");
-  }
+  buildCtx.map(ctx => {
+    const main = ctx.lookupFunction("main");
+    if (main) {
+      ctx.global.forEach((fd, name) => {
+        console.log(`${name} : ${fd.displayType()}`);
+      });
+      console.log(main.body.eval(ctx));
+    } else {
+      console.error("Function main is not found");
+    }
+  });
 } else {
   clo.showHelp();
 }
