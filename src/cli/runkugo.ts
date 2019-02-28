@@ -15,7 +15,7 @@ if (files.length === 1) {
   const parsedAst = parseKugoFile(file).ast;
   const buildCtx = builtInContext.extend(parsedAst);
 
-  buildCtx.map(ctx => {
+  buildCtx.with(ctx => {
     const main = ctx.lookupFunction("main");
     if (main) {
       ctx.global.forEach((fd, name) => {

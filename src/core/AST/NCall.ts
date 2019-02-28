@@ -1,4 +1,5 @@
 import { INExpression, Value } from ".";
+import { Maybe } from "../../utils/Maybe";
 import { Context } from "../Context";
 import { KugoError } from "../KugoError";
 
@@ -8,14 +9,19 @@ export class NCall implements INExpression {
     public readonly args: [INExpression],
   ) {}
 
-  public eval(context: Context): Value | KugoError[] {
-    return context.lookupLocal(this.name) || this.buildMethod(context);
+  public eval(context: Context): Maybe<Value> {
+    const local = context.lookupLocal(this.name);
+    if (local) {
+      return Maybe.just(local);
+    }
+
+    return this.buildMethod(context);
   }
 
-  private buildMethod(context: Context): Value | KugoError[] {
+  private buildMethod(context: Context): Maybe<Value> {
     const functionAnnotation = context.lookupFunction(this.name);
     if (functionAnnotation === undefined) {
-      return [new KugoError(`Unknown function ${this.name}`)];
+      return Maybe.fail(new KugoError(`Unknown function ${this.name}`));
     }
 
     return functionAnnotation.body.eval(context);

@@ -3,6 +3,7 @@ import { FunctionAnnotation } from "../../core/AST/FunctionAnnotation";
 import { ArgsTable, Context, FunctionsTable } from "../../core/Context";
 import { KugoError } from "../../core/KugoError";
 import { MetaType } from "../../core/Type/Meta";
+import { Maybe } from "../../utils/Maybe";
 import { PExpression } from "./PExpression";
 
 export class CallPExpression extends PExpression {
@@ -14,32 +15,30 @@ export class CallPExpression extends PExpression {
   }
 
   public build(): Body {
-    return (ctx: Context): Value | KugoError[] => {
+    return (ctx: Context): Maybe<Value> => {
       const localValue = ctx.lookupLocal(this.name);
       // TODO: Check this has no args
       if (localValue) {
-        return localValue;
+        return Maybe.just(localValue);
       }
 
       const ctxFunction = ctx.lookupFunction(this.name);
 
-      if (ctxFunction) {
-        const mValues = this.args.map(arg => arg.build()(ctx));
-        let valueErrors: KugoError[] = [];
-        const values: Value[] = [];
+      if (!ctxFunction) {
+        return Maybe.fail(new KugoError(`Function ${this.name} not found`));
+      }
 
-        mValues.forEach(val => {
-          if (val instanceof Array) {
-            valueErrors = valueErrors.concat(val);
-          } else {
-            values.push(val);
-          }
+      let argBuilds: Maybe<Value[]> = Maybe.just([]);
+
+      this.args.forEach(arg => {
+        argBuilds = argBuilds.map(builtArgs => {
+          return arg
+            .build()(ctx)
+            .map(newArg => Maybe.just(builtArgs.concat([newArg])));
         });
+      });
 
-        if (valueErrors.length) {
-          return valueErrors;
-        }
-
+      return argBuilds.map(values => {
         // TODO: Check sizes
         const local: ArgsTable = new Map(
           ctxFunction.args.map(
@@ -50,20 +49,19 @@ export class CallPExpression extends PExpression {
         );
 
         return ctxFunction.body.eval(ctx.nest(local));
-      }
-      return [new KugoError(`Function ${this.name} not found`)];
+      });
     };
   }
 
-  public type(ctx: Context, ext: FunctionsTable): MetaType | KugoError[] {
+  public type(ctx: Context, ext: FunctionsTable): Maybe<MetaType> {
     const expFunctionAnnotation =
       ext.get(this.name) || ctx.lookupFunction(this.name);
 
     if (!expFunctionAnnotation) {
-      return [new KugoError(`Failed to obtain type of ${this.name}`)];
+      return Maybe.fail(new KugoError(`Failed to obtain type of ${this.name}`));
     }
 
-    return expFunctionAnnotation.returnType;
+    return Maybe.just(expFunctionAnnotation.returnType);
   }
 
   public buildArgTypes(

@@ -6,9 +6,10 @@ import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterva
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
 import { Natural0NumberType } from "./core/Type/Integral/Natural0NumberType";
 import { UnionMetaType } from "./core/Type/Meta/UnionMetaType";
+import { Maybe } from "./utils/Maybe";
 
 const buildBody = (f: any, ...names: string[]): Body => {
-  return (ctx: Context): Value | KugoError[] => {
+  return (ctx: Context): Maybe<Value> => {
     const missed: string[] = [];
     const values: Value[] = [];
 
@@ -24,10 +25,12 @@ const buildBody = (f: any, ...names: string[]): Body => {
     });
 
     if (missed.length) {
-      return missed.map(name => new KugoError(`Function ${name} not found`));
+      return Maybe.fail(
+        missed.map(name => new KugoError(`Function ${name} not found`)),
+      );
     }
 
-    return f(...values);
+    return Maybe.just(f(...values));
   };
 };
 

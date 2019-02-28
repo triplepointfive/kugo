@@ -11,9 +11,11 @@ import {
 describe("InterpreterFixture", () => {
   it("evaluate", () => {
     const ctx = new Context(builtInFunctions, new Map([["v", -3]]));
-    expect(
-      ctx.evaluate(new NCall("abs", [new NConstant(-3, new AnyMetaType())])),
-    ).toEqual(3);
+    const builtValue = ctx.evaluate(
+      new NCall("abs", [new NConstant(-3, new AnyMetaType())]),
+    );
+    expect(builtValue.failed).toBeFalsy();
+    builtValue.with(value => expect(value).toEqual(3));
   });
 
   it("undefined function called", () => {

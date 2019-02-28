@@ -27,17 +27,17 @@ describe("PFunctionDeclaration", () => {
     });
 
     expect(buildCtx.failed).toBeFalsy();
-    buildCtx.map(ctx => {
+    buildCtx.with(ctx => {
       const main = ctx.lookupFunction("main");
       expect(main && main.returnType).toEqual(Z);
       expect(main && main.args).toEqual([]);
-      expect(main && main.body.eval(ctx)).toEqual(8);
+      expect(main && main.body.eval(ctx).value).toEqual(8);
 
       const addThree = ctx.lookupFunction("addThree");
       expect(addThree && addThree.returnType).toEqual(Z);
       expect(addThree && addThree.args).toEqual([["a", Z]]);
       expect(
-        addThree && addThree.body.eval(ctx.nest(new Map([["a", -3]]))),
+        addThree && addThree.body.eval(ctx.nest(new Map([["a", -3]]))).value,
       ).toEqual(0);
     });
   });

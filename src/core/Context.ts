@@ -2,7 +2,6 @@ import { IPApp } from "../parser/AST";
 import { Maybe } from "../utils/Maybe";
 import { INExpression, Value } from "./AST";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
-import { KugoError } from "./KugoError";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
@@ -23,12 +22,13 @@ export class Context {
       }
 
       const buildErrors = fd.build(this, ext);
-      if (buildErrors) {
-        return new Maybe<Context>(buildErrors);
+      // TODO: Simplify
+      if (buildErrors.failed) {
+        return Maybe.fail(buildErrors.errors);
       }
     }
 
-    return new Maybe(
+    return Maybe.just(
       new Context(new Map([...this.global, ...ext]), this.local),
     );
   }
@@ -37,7 +37,7 @@ export class Context {
     return new Context(this.global, local);
   }
 
-  public evaluate(expression: INExpression): Value | KugoError[] {
+  public evaluate(expression: INExpression): Maybe<Value> {
     return expression.eval(this);
   }
 
