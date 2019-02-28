@@ -2,6 +2,7 @@ import { MetaType } from ".";
 import { BaseType } from "../BaseType";
 import { MergeBaseTypeVisitor } from "../MergeBaseTypeVisitor";
 import { NeverMetaType } from "./NeverMetaType";
+import { MetaTypeVisitor } from "./Visitor/MetaTypeVisitor";
 
 export class UnionMetaType extends MetaType {
   constructor(public readonly options: BaseType[]) {
@@ -41,5 +42,9 @@ export class UnionMetaType extends MetaType {
 
   public display(): string {
     return this.options.map(type => type.display()).join(" ∪ ");
+  }
+
+  public visit<T>(visitor: MetaTypeVisitor<T>): T {
+    return visitor.visitUnion(this);
   }
 }

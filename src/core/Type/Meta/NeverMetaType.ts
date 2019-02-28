@@ -1,5 +1,6 @@
 import { MetaType } from ".";
 import { BaseType } from "../BaseType";
+import { MetaTypeVisitor } from "./Visitor/MetaTypeVisitor";
 
 export class NeverMetaType extends MetaType {
   public union(type: MetaType): MetaType {
@@ -16,5 +17,9 @@ export class NeverMetaType extends MetaType {
 
   public display(): string {
     return "never";
+  }
+
+  public visit<T>(visitor: MetaTypeVisitor<T>): T {
+    return visitor.visitNever(this);
   }
 }

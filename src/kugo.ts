@@ -16,7 +16,7 @@ const buildBody = (f: any, ...names: string[]): Body => {
       // TODO: Check whether it can be not-local
       const val = ctx.lookupLocal(name);
 
-      if (val) {
+      if (val !== undefined) {
         values.push(val);
       } else {
         missed.push(name);

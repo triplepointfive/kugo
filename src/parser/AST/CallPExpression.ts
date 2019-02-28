@@ -48,6 +48,7 @@ export class CallPExpression extends PExpression {
             },
           ),
         );
+
         return ctxFunction.body.eval(ctx.nest(local));
       }
       return [new KugoError(`Function ${this.name} not found`)];

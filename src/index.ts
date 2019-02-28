@@ -3,6 +3,7 @@ export * from "./core/Type/NumberType";
 export * from "./core/Type/Meta/AnyMetaType";
 export * from "./core/Type/Meta/NeverMetaType";
 export * from "./core/Type/Meta/index";
+export * from "./core/Type/Meta/Visitor/MetaTypeVisitor";
 export * from "./core/Type/Meta/UnionMetaType";
 export * from "./core/Type/BaseType";
 export * from "./core/Type/Integral/IntegerNumberInterval";
