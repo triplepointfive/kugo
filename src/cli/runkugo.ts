@@ -15,6 +15,10 @@ if (files.length === 1) {
   const parsedAst = parseKugoFile(file).ast;
   const buildCtx = builtInContext.extend(parsedAst);
 
+  if (buildCtx.failed) {
+    buildCtx.errors.forEach(({ message }) => console.log(message));
+  }
+
   buildCtx.with(ctx => {
     const main = ctx.lookupFunction("main");
     if (main) {

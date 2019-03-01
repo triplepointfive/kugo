@@ -5,17 +5,23 @@ import { Maybe } from "../../utils/Maybe";
 import { CallPExpression } from "./CallPExpression";
 import { NumberPExpression } from "./NumberPExpression";
 import { PExpressionVisitor } from "./PExpressionVisitor";
+import { FunctionArgs } from "../../core/AST";
 
 export class ReturnTypePExpressionVisitor extends PExpressionVisitor<
   Maybe<MetaType>
 > {
-  constructor(private context: Context) {
+  constructor(private context: Context, private args: FunctionArgs) {
     super();
   }
 
   public visitFunctionCall(functionCall: CallPExpression): Maybe<MetaType> {
     const definedFunction = this.context.lookupFunction(functionCall.name);
     if (definedFunction === undefined) {
+      const arg = this.args.find(({ name }) => name === functionCall.name);
+      if (arg) {
+        return Maybe.just(arg.type);
+      }
+
       return Maybe.fail(
         new KugoError(`Function ${functionCall.name} is not found`),
       );

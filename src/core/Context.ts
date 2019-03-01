@@ -22,7 +22,7 @@ export class Context {
       const builtFa = FunctionArgsPExpressionVisitor.build(ctx, fd).map(
         args => {
           return fd.expression
-            .visit(new ReturnTypePExpressionVisitor(ctx))
+            .visit(new ReturnTypePExpressionVisitor(ctx, args))
             .map(returnType => {
               return Maybe.just(
                 new FunctionAnnotation(args, returnType, {
