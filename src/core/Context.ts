@@ -1,6 +1,8 @@
-import { IPApp } from "../parser/AST";
+import { PApp } from "../parser/AST";
+import { FunctionArgsPExpressionVisitor } from "../parser/AST/FunctionArgsPExpressionVisitor";
+import { ReturnTypePExpressionVisitor } from "../parser/AST/ReturnTypePExpressionVisitor";
 import { Maybe } from "../utils/Maybe";
-import { INExpression, Value } from "./AST";
+import { NExpression, Value } from "./AST";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
@@ -12,32 +14,40 @@ export class Context {
     public readonly local: ArgsTable,
   ) {}
 
-  public extend(pApp: IPApp): Maybe<Context> {
-    const ext: FunctionsTable = new Map();
+  public extend({ functionDeclarations }: PApp): Maybe<Context> {
+    // Extra: Optimize to remove extra reallocation
+    const ctx = new Context(new Map([...this.global]), this.local);
 
-    // TODO: Allow to use not yet defined function
-    for (const fd of pApp.functionDeclarations) {
-      if (this.lookupFunction(fd.name)) {
-        // TODO throw already defined
+    for (const fd of functionDeclarations) {
+      const builtFa = FunctionArgsPExpressionVisitor.build(ctx, fd).map(
+        args => {
+          return fd.expression
+            .visit(new ReturnTypePExpressionVisitor(ctx))
+            .map(returnType => {
+              return Maybe.just(
+                new FunctionAnnotation(args, returnType, {
+                  eval: fd.expression.build(),
+                }),
+              );
+            });
+        },
+      );
+
+      if (builtFa.failed) {
+        return Maybe.fail(builtFa.errors);
       }
 
-      const buildErrors = fd.build(this, ext);
-      // TODO: Simplify
-      if (buildErrors.failed) {
-        return Maybe.fail(buildErrors.errors);
-      }
+      builtFa.with(fa => ctx.global.set(fd.name, fa));
     }
 
-    return Maybe.just(
-      new Context(new Map([...this.global, ...ext]), this.local),
-    );
+    return Maybe.just(ctx);
   }
 
   public nest(local: ArgsTable): Context {
     return new Context(this.global, local);
   }
 
-  public evaluate(expression: INExpression): Maybe<Value> {
+  public evaluate(expression: NExpression): Maybe<Value> {
     return expression.eval(this);
   }
 

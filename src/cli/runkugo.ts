@@ -21,7 +21,7 @@ if (files.length === 1) {
       ctx.global.forEach((fd, name) => {
         console.log(`${name} : ${fd.displayType()}`);
       });
-      console.log(main.body.eval(ctx));
+      console.log("Main: ", main.body.eval(ctx));
     } else {
       console.error("Function main is not found");
     }

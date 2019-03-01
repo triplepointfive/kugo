@@ -1,12 +1,12 @@
-import { INExpression, Value } from ".";
+import { NExpression, Value } from ".";
 import { Maybe } from "../../utils/Maybe";
 import { Context } from "../Context";
 import { KugoError } from "../KugoError";
 
-export class NCall implements INExpression {
+export class NCall implements NExpression {
   constructor(
     public readonly name: string,
-    public readonly args: [INExpression],
+    public readonly args: [NExpression],
   ) {}
 
   public eval(context: Context): Maybe<Value> {

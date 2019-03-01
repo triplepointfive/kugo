@@ -1,5 +1,5 @@
-import { PFunctionDeclaration } from "./AST/IPFunctionDeclaration";
+import { PFunctionDeclaration } from "./AST/PFunctionDeclaration";
 
-export interface IPApp {
+export interface PApp {
   functionDeclarations: PFunctionDeclaration[];
 }

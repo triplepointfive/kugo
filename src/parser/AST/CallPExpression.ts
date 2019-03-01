@@ -5,6 +5,7 @@ import { KugoError } from "../../core/KugoError";
 import { MetaType } from "../../core/Type/Meta";
 import { Maybe } from "../../utils/Maybe";
 import { PExpression } from "./PExpression";
+import { PExpressionVisitor } from "./PExpressionVisitor";
 
 export class CallPExpression extends PExpression {
   constructor(
@@ -42,7 +43,7 @@ export class CallPExpression extends PExpression {
         // TODO: Check sizes
         const local: ArgsTable = new Map(
           ctxFunction.args.map(
-            ([name, _]: Arg, i: number): [string, Value] => {
+            ({ name }: Arg, i: number): [string, Value] => {
               return [name, values[i]];
             },
           ),
@@ -53,6 +54,7 @@ export class CallPExpression extends PExpression {
     };
   }
 
+  // TODO: Also typecheck here
   public type(ctx: Context, ext: FunctionsTable): Maybe<MetaType> {
     const expFunctionAnnotation =
       ext.get(this.name) || ctx.lookupFunction(this.name);
@@ -62,6 +64,10 @@ export class CallPExpression extends PExpression {
     }
 
     return Maybe.just(expFunctionAnnotation.returnType);
+  }
+
+  public visit<T>(visitor: PExpressionVisitor<T>): T {
+    return visitor.visitFunctionCall(this);
   }
 
   public buildArgTypes(
@@ -77,8 +83,8 @@ export class CallPExpression extends PExpression {
       this.args.length === 0
     ) {
       functionArgs.forEach(arg => {
-        if (arg[0] === this.name) {
-          arg[1] = arg[1].intersect(annotation.args[index][1]);
+        if (arg.name === this.name) {
+          arg.type = arg.type.intersect(annotation.args[index].type);
         }
       });
     }

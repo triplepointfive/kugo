@@ -23,7 +23,7 @@ export * from "./parser/AST";
 export * from "./parser/Parser";
 export * from "./parser/AST/PExpression";
 export * from "./parser/AST/CallPExpression";
-export * from "./parser/AST/IPFunctionDeclaration";
+export * from "./parser/AST/PFunctionDeclaration";
 export * from "./parser/AST/NumberPExpression";
 export * from "./parser/index";
 export * from "./kugo";

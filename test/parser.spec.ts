@@ -1,19 +1,19 @@
 import {
   CallPExpression,
-  IPApp,
   NumberPExpression,
+  PApp,
   parseKugoFile,
   PExpression,
   PFunctionDeclaration,
 } from "../src";
 
-const app = (fun: PFunctionDeclaration): IPApp => {
+const app = (fun: PFunctionDeclaration): PApp => {
   return {
     functionDeclarations: [fun],
   };
 };
 
-const apps = (functionDeclarations: PFunctionDeclaration[]): IPApp => {
+const apps = (functionDeclarations: PFunctionDeclaration[]): PApp => {
   return {
     functionDeclarations,
   };
@@ -40,7 +40,7 @@ const snd = f("snd", ["a", "b"], call("b", []));
 
 describe("Parser", () => {
   it("Parsers source code into AST", () => {
-    const cases: Array<[string, IPApp]> = [
+    const cases: Array<[string, PApp]> = [
       [
         "avg a b = div sum a b",
         app(

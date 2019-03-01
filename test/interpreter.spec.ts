@@ -23,6 +23,6 @@ describe("InterpreterFixture", () => {
     const ctx = builtInContext.extend(parsedAst);
 
     expect(ctx.errors).toHaveLength(1);
-    expect(ctx.errors[0].message).toEqual("Failed to obtain type of summ");
+    expect(ctx.errors[0].message).toEqual("Function summ is not found");
   });
 });

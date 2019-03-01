@@ -1,4 +1,4 @@
-import { IPApp } from "./AST";
+import { PApp } from "./AST";
 import { KugoToAstVisitor } from "./AstVisitor";
 import { KugoLexer } from "./Lexer";
 import { KugoParser } from "./Parser";
@@ -7,14 +7,14 @@ import { KugoParser } from "./Parser";
 const parser = new KugoParser();
 const toAstVisitorInstance = new KugoToAstVisitor();
 
-interface IParser {
-  ast: IPApp;
+interface ParseResult {
+  ast: PApp;
   cst: any;
   lexErrors: any;
   parseErrors: any;
 }
 
-export function parseKugoFile(text: string): IParser {
+export function parseKugoFile(text: string): ParseResult {
   const lexResult = KugoLexer.tokenize(text);
   // setting a new input will RESET the parser instance's state.
   parser.input = lexResult.tokens;

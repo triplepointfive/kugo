@@ -1,9 +1,9 @@
 import { tail } from "lodash";
-import { IPApp } from "./AST";
+import { PApp } from "./AST";
 import { CallPExpression } from "./AST/CallPExpression";
-import { PFunctionDeclaration } from "./AST/IPFunctionDeclaration";
 import { NumberPExpression } from "./AST/NumberPExpression";
 import { PExpression } from "./AST/PExpression";
+import { PFunctionDeclaration } from "./AST/PFunctionDeclaration";
 import { KugoParser } from "./Parser";
 
 const parserInstance = new KugoParser();
@@ -15,7 +15,7 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
     this.validateVisitor();
   }
 
-  public app(ctx: any): IPApp {
+  public app(ctx: any): PApp {
     return {
       functionDeclarations: (ctx.functionDeclaration || []).map((fd: any) =>
         this.visit(fd),

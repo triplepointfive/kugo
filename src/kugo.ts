@@ -40,16 +40,16 @@ export const Z = new UnionMetaType([
 
 export const divBody: FunctionAnnotation = new FunctionAnnotation(
   [
-    ["a", Z],
-    [
-      "b",
-      new UnionMetaType([
+    { name: "a", type: Z },
+    {
+      name: "b",
+      type: new UnionMetaType([
         new IntegerNumberType([
           new IntegerNumberInterval({ upper: -1 }),
           new IntegerNumberInterval({ bottom: 1 }),
         ]),
       ]),
-    ],
+    },
   ],
   Z,
   {
@@ -58,28 +58,28 @@ export const divBody: FunctionAnnotation = new FunctionAnnotation(
   },
 );
 export const substBody: FunctionAnnotation = new FunctionAnnotation(
-  [["a", Z], ["b", Z]],
+  [{ name: "a", type: Z }, { name: "b", type: Z }],
   Z,
   {
     eval: ctx => buildBody((a: Value, b: Value) => a - b, "a", "b")(ctx),
   },
 );
 export const sumBody: FunctionAnnotation = new FunctionAnnotation(
-  [["a", Z], ["b", Z]],
+  [{ name: "a", type: Z }, { name: "b", type: Z }],
   Z,
   {
     eval: ctx => buildBody((a: Value, b: Value) => a + b, "a", "b")(ctx),
   },
 );
 export const prodBody: FunctionAnnotation = new FunctionAnnotation(
-  [["a", Z], ["b", Z]],
+  [{ name: "a", type: Z }, { name: "b", type: Z }],
   Z,
   {
     eval: ctx => buildBody((a: Value, b: Value) => a * b, "a", "b")(ctx),
   },
 );
 export const absBody: FunctionAnnotation = new FunctionAnnotation(
-  [["v", Z]],
+  [{ name: "v", type: Z }],
   new UnionMetaType([new Natural0NumberType()]),
   { eval: ctx => buildBody((v: Value) => Math.abs(v), "v")(ctx) },
 );

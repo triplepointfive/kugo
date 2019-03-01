@@ -35,7 +35,7 @@ describe("PFunctionDeclaration", () => {
 
       const addThree = ctx.lookupFunction("addThree");
       expect(addThree && addThree.returnType).toEqual(Z);
-      expect(addThree && addThree.args).toEqual([["a", Z]]);
+      expect(addThree && addThree.args).toEqual([{ name: "a", type: Z }]);
       expect(
         addThree && addThree.body.eval(ctx.nest(new Map([["a", -3]]))).value,
       ).toEqual(0);
