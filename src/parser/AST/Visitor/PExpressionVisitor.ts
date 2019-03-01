@@ -1,5 +1,4 @@
-import { CallPExpression } from "./CallPExpression";
-import { NumberPExpression } from "./NumberPExpression";
+import { CallPExpression, NumberPExpression } from "../../..";
 
 export abstract class PExpressionVisitor<T> {
   public abstract visitFunctionCall(functionCall: CallPExpression): T;

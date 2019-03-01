@@ -1,11 +1,11 @@
-import { Context } from "../..";
-import { KugoError } from "../../core/KugoError";
-import { MetaType } from "../../core/Type/Meta";
-import { Maybe } from "../../utils/Maybe";
-import { CallPExpression } from "./CallPExpression";
-import { NumberPExpression } from "./NumberPExpression";
+import { Context } from "../../..";
+import { FunctionArgs } from "../../../core/AST";
+import { KugoError } from "../../../core/KugoError";
+import { MetaType } from "../../../core/Type/Meta";
+import { Maybe } from "../../../utils/Maybe";
+import { CallPExpression } from "../CallPExpression";
+import { NumberPExpression } from "../NumberPExpression";
 import { PExpressionVisitor } from "./PExpressionVisitor";
-import { FunctionArgs } from "../../core/AST";
 
 export class ReturnTypePExpressionVisitor extends PExpressionVisitor<
   Maybe<MetaType>

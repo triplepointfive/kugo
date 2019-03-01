@@ -1,12 +1,14 @@
-import { FunctionArgs, NExpression } from ".";
+import { FunctionArgs } from ".";
 import { MetaType } from "../Type/Meta";
+import { FunctionAnnotationVisitor } from "./Visitor/FunctionAnnotationVisitor";
 
-export class FunctionAnnotation {
+export abstract class FunctionAnnotation {
   constructor(
     public readonly args: FunctionArgs,
     public readonly returnType: MetaType,
-    public readonly body: NExpression,
   ) {}
+
+  public abstract visit<T>(visitor: FunctionAnnotationVisitor<T>): T;
 
   public displayType(): string {
     if (this.args.length) {

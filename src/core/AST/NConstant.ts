@@ -1,12 +1,14 @@
 import { NExpression, Value } from ".";
-import { Maybe } from "../../utils/Maybe";
-import { Context } from "../Context";
 import { MetaType } from "../Type/Meta";
+import { AstVisitor } from "./Visitor/AstVisitor";
 
-export class NConstant implements NExpression {
-  constructor(public readonly value: Value, public readonly type: MetaType) {}
+export class NConstant extends NExpression {
+  // TODO: Check whether type is required here
+  constructor(public readonly value: Value, public readonly type: MetaType) {
+    super();
+  }
 
-  public eval(context: Context): Maybe<Value> {
-    return Maybe.just(this.value);
+  public visit<T>(visitor: AstVisitor<T>): T {
+    return visitor.visitConstant(this);
   }
 }

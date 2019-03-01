@@ -1,29 +1,15 @@
-import { NExpression, Value } from ".";
-import { Maybe } from "../../utils/Maybe";
-import { Context } from "../Context";
-import { KugoError } from "../KugoError";
+import { NExpression } from ".";
+import { AstVisitor } from "./Visitor/AstVisitor";
 
-export class NCall implements NExpression {
+export class NCall extends NExpression {
   constructor(
     public readonly name: string,
-    public readonly args: [NExpression],
-  ) {}
-
-  public eval(context: Context): Maybe<Value> {
-    const local = context.lookupLocal(this.name);
-    if (local) {
-      return Maybe.just(local);
-    }
-
-    return this.buildMethod(context);
+    public readonly args: NExpression[],
+  ) {
+    super();
   }
 
-  private buildMethod(context: Context): Maybe<Value> {
-    const functionAnnotation = context.lookupFunction(this.name);
-    if (functionAnnotation === undefined) {
-      return Maybe.fail(new KugoError(`Unknown function ${this.name}`));
-    }
-
-    return functionAnnotation.body.eval(context);
+  public visit<T>(visitor: AstVisitor<T>): T {
+    return visitor.visitInvocation(this);
   }
 }

@@ -31,13 +31,13 @@ describe("PFunctionDeclaration", () => {
       const main = ctx.lookupFunction("main");
       expect(main && main.returnType).toEqual(Z);
       expect(main && main.args).toEqual([]);
-      expect(main && main.body.eval(ctx).value).toEqual(8);
+      expect(main && ctx.evalFunction(main).value).toEqual(8);
 
       const addThree = ctx.lookupFunction("addThree");
       expect(addThree && addThree.returnType).toEqual(Z);
       expect(addThree && addThree.args).toEqual([{ name: "a", type: Z }]);
       expect(
-        addThree && addThree.body.eval(ctx.nest(new Map([["a", -3]]))).value,
+        addThree && ctx.nest(new Map([["a", -3]])).evalFunction(addThree).value,
       ).toEqual(0);
     });
   });

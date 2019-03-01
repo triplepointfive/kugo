@@ -11,7 +11,7 @@ import {
 describe("InterpreterFixture", () => {
   it("evaluate", () => {
     const ctx = new Context(builtInFunctions, new Map([["v", -3]]));
-    const builtValue = ctx.evaluate(
+    const builtValue = ctx.evalExp(
       new NCall("abs", [new NConstant(-3, new AnyMetaType())]),
     );
     expect(builtValue.failed).toBeFalsy();

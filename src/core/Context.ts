@@ -1,9 +1,13 @@
 import { PApp } from "../parser/AST";
-import { FunctionArgsPExpressionVisitor } from "../parser/AST/FunctionArgsPExpressionVisitor";
-import { ReturnTypePExpressionVisitor } from "../parser/AST/ReturnTypePExpressionVisitor";
+import { BuildAstPExpressionVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisitor";
+import { FunctionArgsPExpressionVisitor } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
+import { ReturnTypePExpressionVisitor } from "../parser/AST/Visitor/ReturnTypePExpressionVisitor";
 import { Maybe } from "../utils/Maybe";
 import { NExpression, Value } from "./AST";
+import { AddedFunctionAnnotation } from "./AST/AddedFunctionAnnotation";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
+import { EvalAstVisitor } from "./AST/Visitor/EvalAstVisitor";
+import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
@@ -24,11 +28,13 @@ export class Context {
           return fd.expression
             .visit(new ReturnTypePExpressionVisitor(ctx, args))
             .map(returnType => {
-              return Maybe.just(
-                new FunctionAnnotation(args, returnType, {
-                  eval: fd.expression.build(),
-                }),
-              );
+              return fd.expression
+                .visit(new BuildAstPExpressionVisitor())
+                .map(body => {
+                  return Maybe.just(
+                    new AddedFunctionAnnotation(args, returnType, body),
+                  );
+                });
             });
         },
       );
@@ -43,12 +49,16 @@ export class Context {
     return Maybe.just(ctx);
   }
 
-  public nest(local: ArgsTable): Context {
-    return new Context(this.global, local);
+  public evalExp(expression: NExpression): Maybe<Value> {
+    return expression.visit(new EvalAstVisitor(this));
   }
 
-  public evaluate(expression: NExpression): Maybe<Value> {
-    return expression.eval(this);
+  public evalFunction(functionAnnotation: FunctionAnnotation): Maybe<Value> {
+    return functionAnnotation.visit(new EvalFunctionAnnotationVisitor(this));
+  }
+
+  public nest(local: ArgsTable): Context {
+    return new Context(this.global, local);
   }
 
   public lookupFunction(name: string): FunctionAnnotation | undefined {

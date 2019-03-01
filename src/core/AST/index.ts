@@ -1,6 +1,5 @@
-import { Maybe } from "../../utils/Maybe";
-import { Context } from "../Context";
 import { MetaType } from "../Type/Meta";
+import { AstVisitor } from "./Visitor/AstVisitor";
 
 export interface Arg {
   name: string;
@@ -9,8 +8,7 @@ export interface Arg {
 export type FunctionArgs = Arg[];
 
 export type Value = number;
-export type Body = (ctx: Context) => Maybe<Value>;
 
-export interface NExpression {
-  eval: Body;
+export abstract class NExpression {
+  public abstract visit<T>(visitor: AstVisitor<T>): T;
 }

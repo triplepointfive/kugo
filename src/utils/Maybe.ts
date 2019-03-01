@@ -22,13 +22,13 @@ export class Maybe<T> {
   }
 
   public with(f: (t: T) => void): void {
-    if (this.value) {
+    if (this.value !== undefined) {
       f(this.value);
     }
   }
 
   public map<R>(f: (t: T) => Maybe<R>): Maybe<R> {
-    if (this.value) {
+    if (this.value !== undefined) {
       return f(this.value);
     }
     return Maybe.fail<R>(this.errors);
