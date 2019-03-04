@@ -15,10 +15,6 @@ export class NeverMetaType extends MetaType {
     return this;
   }
 
-  public display(): string {
-    return "never";
-  }
-
   public visit<T>(visitor: MetaTypeVisitor<T>): T {
     return visitor.visitNever(this);
   }

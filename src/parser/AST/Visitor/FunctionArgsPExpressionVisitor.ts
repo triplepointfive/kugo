@@ -52,8 +52,8 @@ export class FunctionArgsPExpressionVisitor extends PExpressionVisitor<
     super();
 
     this.args = args.map(
-      (name: string): Arg => {
-        return { name, type: new AnyMetaType() };
+      (name: string, i: number): Arg => {
+        return { name, type: new AnyMetaType(i) };
       },
     );
   }

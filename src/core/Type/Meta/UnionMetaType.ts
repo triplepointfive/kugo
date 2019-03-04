@@ -40,10 +40,6 @@ export class UnionMetaType extends MetaType {
     }
   }
 
-  public display(): string {
-    return this.options.map(type => type.display()).join(" ∪ ");
-  }
-
   public visit<T>(visitor: MetaTypeVisitor<T>): T {
     return visitor.visitUnion(this);
   }

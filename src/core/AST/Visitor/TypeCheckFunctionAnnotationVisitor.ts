@@ -28,11 +28,8 @@ export class TypeCheckFunctionAnnotationVisitor extends FunctionAnnotationVisito
     return Maybe.just(undefined);
   }
 
-  private astTypeChecker: TypeCheckAstVisitor;
-
   protected constructor(context: Context) {
     super(context);
-    this.astTypeChecker = new TypeCheckAstVisitor(context);
   }
 
   public visitBuiltIn(fa: BuiltInFunctionAnnotation): Maybe<MetaType> {
@@ -40,6 +37,6 @@ export class TypeCheckFunctionAnnotationVisitor extends FunctionAnnotationVisito
   }
 
   public visitAdded(fa: AddedFunctionAnnotation): Maybe<MetaType> {
-    return fa.body.visit(this.astTypeChecker);
+    return fa.body.visit(new TypeCheckAstVisitor(this.context, fa.args));
   }
 }

@@ -4,6 +4,10 @@ import { UnionMetaType } from "./UnionMetaType";
 import { MetaTypeVisitor } from "./Visitor/MetaTypeVisitor";
 
 export class AnyMetaType extends MetaType {
+  constructor(public readonly index: number) {
+    super();
+  }
+
   public union(type: MetaType): MetaType {
     return this;
   }
@@ -14,10 +18,6 @@ export class AnyMetaType extends MetaType {
 
   public intersectType(type: BaseType): MetaType {
     return new UnionMetaType([type]);
-  }
-
-  public display(): string {
-    return "any";
   }
 
   public visit<T>(visitor: MetaTypeVisitor<T>): T {

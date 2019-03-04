@@ -1,5 +1,6 @@
 import { FunctionArgs } from ".";
 import { MetaType } from "../Type/Meta";
+import { DisplayMetaTypeVisitor } from "../Type/Meta/Visitor/DisplayMetaTypeVisitor";
 import { FunctionAnnotationVisitor } from "./Visitor/FunctionAnnotationVisitor";
 
 export abstract class FunctionAnnotation {
@@ -11,12 +12,6 @@ export abstract class FunctionAnnotation {
   public abstract visit<T>(visitor: FunctionAnnotationVisitor<T>): T;
 
   public displayType(): string {
-    if (this.args.length) {
-      return `${this.args
-        .map(({ type }) => type.display())
-        .join(" → ")} → ${this.returnType.display()}`;
-    } else {
-      return this.returnType.display();
-    }
+    return DisplayMetaTypeVisitor.build(this);
   }
 }

@@ -1,5 +1,5 @@
-import { builtInContext, KugoError, parseKugoFile } from "../src";
-import { Maybe } from "../src/utils/Maybe";
+import { builtInContext, KugoError, parseKugoFile } from "../../src";
+import { Maybe } from "../../src/utils/Maybe";
 
 const evalExp = (file: string) => {
   const parsedAst = parseKugoFile(file).ast;
@@ -24,10 +24,6 @@ const expectEval = (file: string, result: string): void => {
   expect(evalExp(file)).toEqual(result);
 };
 
-// TODO: Check for lex errors
-// TODO: Type fails
-// TODO: Syntax fails
-
 describe("raw values", () => {
   it("integer", () => {
     expectEval("main = -3", "-3");
@@ -43,6 +39,12 @@ describe("built in", () => {
     expectEval("main = sum 10 2", "12");
     expectEval("main = subst 10 2", "8");
     expectEval("main = prod 10 2", "20");
+  });
+});
+
+describe("functions", () => {
+  it("args", () => {
+    expectEval("const a b = a\nmain = const 1 3", "1");
   });
 });
 
