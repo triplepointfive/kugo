@@ -24,19 +24,21 @@ export class IntegerNumberInterval {
       this.upper && interval.upper
         ? Math.min(this.upper, interval.upper)
         : this.upper || interval.upper;
-    if (bottom && upper && bottom > upper) {
+    if (bottom !== undefined && upper !== undefined && bottom > upper) {
       return undefined;
     }
     return new IntegerNumberInterval({ bottom, upper });
   }
 
   public display(): string {
-    if (this.bottom && this.bottom === this.upper) {
+    if (this.bottom !== undefined && this.bottom === this.upper) {
       return `${this.bottom}`;
     }
 
-    return `${this.bottom ? "[" : "("}${this.bottom ? this.bottom : "-∞"}, ${
-      this.upper ? this.upper : "+∞"
-    }${this.upper ? "]" : ")"}`;
+    return `${this.bottom !== undefined ? "[" : "("}${
+      this.bottom !== undefined ? this.bottom : "-∞"
+    }, ${this.upper !== undefined ? this.upper : "+∞"}${
+      this.upper !== undefined ? "]" : ")"
+    }`;
   }
 }

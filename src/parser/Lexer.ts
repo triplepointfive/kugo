@@ -1,6 +1,9 @@
 import { createToken, Lexer } from "chevrotain";
 
-export const Const = createToken({ name: "Const", pattern: /\d+/ });
+export const Const = createToken({
+  name: "Const",
+  pattern: /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/,
+});
 export const Identity = createToken({
   name: "Identity",
   pattern: /[a-zA-Z]+\w*/,

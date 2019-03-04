@@ -17,7 +17,10 @@ export class IntegerNumberType extends NumberType {
       return "ℤ";
     }
 
-    if (!this.bounds[0].bottom && !this.bounds[0].upper) {
+    if (
+      this.bounds[0].bottom === undefined &&
+      this.bounds[0].upper === undefined
+    ) {
       return "ℤ";
     }
 

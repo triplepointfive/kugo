@@ -11,8 +11,8 @@ export class IsSubsetMetaTypeVisitor extends MetaTypeVisitor<
   /**
    * @returns Whether [[origin]] is a subset of [[dest]].
    */
-  public static check(origin: MetaType, dest: MetaType) {
-    dest.visit(
+  public static check(origin: MetaType, dest: MetaType): boolean {
+    return dest.visit(
       origin.visit<MetaTypeVisitor<boolean>>(new IsSubsetMetaTypeVisitor()),
     );
   }

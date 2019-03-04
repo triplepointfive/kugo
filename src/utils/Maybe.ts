@@ -21,9 +21,16 @@ export class Maybe<T> {
     }
   }
 
-  public with(f: (t: T) => void): void {
+  public with(
+    ok: (t: T) => void,
+    fail: (errors: KugoError[]) => void = () => {
+      return;
+    },
+  ): void {
     if (this.value !== undefined) {
-      f(this.value);
+      ok(this.value);
+    } else {
+      fail(this.errors);
     }
   }
 

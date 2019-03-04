@@ -8,6 +8,7 @@ import { AddedFunctionAnnotation } from "./AST/AddedFunctionAnnotation";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
 import { EvalAstVisitor } from "./AST/Visitor/EvalAstVisitor";
 import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
+import { TypeCheckFunctionAnnotationVisitor } from "./AST/Visitor/TypeCheckFunctionAnnotationVisitor";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
@@ -23,20 +24,16 @@ export class Context {
     const ctx = new Context(new Map([...this.global]), this.local);
 
     for (const fd of functionDeclarations) {
-      const builtFa = FunctionArgsPExpressionVisitor.build(ctx, fd).map(
-        args => {
-          return fd.expression
-            .visit(new ReturnTypePExpressionVisitor(ctx, args))
-            .map(returnType => {
-              return fd.expression
-                .visit(new BuildAstPExpressionVisitor())
-                .map(body => {
-                  return Maybe.just(
-                    new AddedFunctionAnnotation(args, returnType, body),
-                  );
-                });
-            });
-        },
+      const builtFa = FunctionArgsPExpressionVisitor.build(ctx, fd).map(args =>
+        fd.expression
+          .visit(new ReturnTypePExpressionVisitor(ctx, args))
+          .map(returnType =>
+            fd.expression
+              .visit(new BuildAstPExpressionVisitor())
+              .map(body =>
+                Maybe.just(new AddedFunctionAnnotation(args, returnType, body)),
+              ),
+          ),
       );
 
       if (builtFa.failed) {
@@ -46,11 +43,13 @@ export class Context {
       builtFa.with(fa => ctx.global.set(fd.name, fa));
     }
 
-    return Maybe.just(ctx);
-  }
+    const typeCheck = TypeCheckFunctionAnnotationVisitor.check(ctx);
 
-  public evalExp(expression: NExpression): Maybe<Value> {
-    return expression.visit(new EvalAstVisitor(this));
+    if (typeCheck.failed) {
+      return Maybe.fail(typeCheck.errors);
+    }
+
+    return Maybe.just(ctx);
   }
 
   public evalFunction(functionAnnotation: FunctionAnnotation): Maybe<Value> {
