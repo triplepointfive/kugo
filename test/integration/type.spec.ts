@@ -2,15 +2,16 @@ import { builtInContext, KugoError, parseKugoFile } from "../../src";
 import { Maybe } from "../../src/utils/Maybe";
 
 const evalExp = (file: string, funcMain: string = "main") => {
-  const parsedAst = parseKugoFile(file).ast;
-  const buildCtx = builtInContext.extend(parsedAst);
-  const evalCtx = buildCtx.map(ctx => {
-    const func = ctx.lookupFunction(funcMain);
-    if (func) {
-      return Maybe.just(func.displayType());
-    } else {
-      return Maybe.fail(new KugoError(`Function ${func} is not found`));
-    }
+  const evalCtx = parseKugoFile(file).map(({ ast }) => {
+    const buildCtx = builtInContext.extend(ast);
+    return buildCtx.map(ctx => {
+      const func = ctx.lookupFunction(funcMain);
+      if (func) {
+        return Maybe.just(func.displayType());
+      } else {
+        return Maybe.fail(new KugoError(`Function ${func} is not found`));
+      }
+    });
   });
 
   if (evalCtx.failed) {

@@ -17,7 +17,7 @@ export * from "./core/AST/index";
 export * from "./core/KugoError";
 export * from "./cli/kugoi";
 export * from "./cli/runkugo";
-export * from "./parser/AstVisitor";
+export * from "./parser/CstVisitor";
 export * from "./parser/Lexer";
 export * from "./parser/AST";
 export * from "./parser/Parser";

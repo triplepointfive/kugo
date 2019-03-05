@@ -7,21 +7,23 @@ import {
   Identity,
   NewLine,
   OpenParentheses,
+  Indent,
+  Outdent,
 } from "./Lexer";
 
 export class KugoParser extends Parser {
   public app = this.RULE("app", () => {
-    this.MANY1({
-      DEF: () => this.CONSUME1(NewLine),
-    });
+    // this.MANY1({
+    //   DEF: () => this.CONSUME1(NewLine),
+    // });
 
     this.MANY2({
       DEF: () => this.SUBRULE(this.functionDeclaration),
     });
 
-    this.MANY3({
-      DEF: () => this.CONSUME2(NewLine),
-    });
+    // this.MANY3({
+    //   DEF: () => this.CONSUME2(NewLine),
+    // });
   });
 
   private functionDeclaration = this.RULE("functionDeclaration", () => {
@@ -31,13 +33,21 @@ export class KugoParser extends Parser {
       DEF: () => this.CONSUME2(Identity),
     });
 
+    this.OR([
+      { ALT: () => this.SUBRULE(this.functionDeclarationBody) },
+      {
+        ALT: () => {
+          this.CONSUME(Indent);
+          this.SUBRULE1(this.functionDeclarationBody);
+          this.CONSUME(Outdent);
+        },
+      },
+    ]);
+  });
+
+  private functionDeclarationBody = this.RULE("functionDeclarationBody", () => {
     this.CONSUME(Define);
-
     this.SUBRULE(this.expression);
-
-    this.OPTION({
-      DEF: () => this.CONSUME1(NewLine),
-    });
   });
 
   private expression = this.RULE("expression", () => {

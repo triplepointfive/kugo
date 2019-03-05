@@ -27,8 +27,12 @@ export class KugoToAstVisitor extends BaseKugoVisitor {
     return new PFunctionDeclaration(
       ctx.Identity[0].image,
       tail(ctx.Identity).map((token: any): string => token.image),
-      this.visit(ctx.expression),
+      this.visit(ctx.functionDeclarationBody),
     );
+  }
+
+  public functionDeclarationBody(ctx: any): any {
+    return this.visit(ctx.expression);
   }
 
   public expression(ctx: any): PExpression {

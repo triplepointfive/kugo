@@ -1,6 +1,9 @@
+import { IRecognitionException } from "chevrotain";
+import { KugoError } from "../core/KugoError";
+import { Maybe } from "../utils/Maybe";
 import { PApp } from "./AST";
-import { KugoToAstVisitor } from "./AstVisitor";
-import { KugoLexer } from "./Lexer";
+import { KugoToAstVisitor } from "./CstVisitor";
+import { tokenize } from "./Lexer";
 import { KugoParser } from "./Parser";
 
 // reuse the same parser instance.
@@ -10,24 +13,28 @@ const toAstVisitorInstance = new KugoToAstVisitor();
 interface ParseResult {
   ast: PApp;
   cst: any;
-  lexErrors: any;
-  parseErrors: any;
 }
 
-export function parseKugoFile(text: string): ParseResult {
-  const lexResult = KugoLexer.tokenize(text);
+export function parseKugoFile(text: string): Maybe<ParseResult> {
   // setting a new input will RESET the parser instance's state.
-  parser.input = lexResult.tokens;
+  return tokenize(text).map(({ tokens }) => {
+    parser.input = tokens;
 
-  const cst = parser.app();
+    const cst = parser.app();
 
-  // TODO: Build KugoErrors from lex or parse errors
-  return {
-    ast: toAstVisitorInstance.visit(cst),
-    // This is a pure grammar, the value will be undefined until we add embedded actions
-    // or enable automatic CST creation.
-    cst,
-    lexErrors: lexResult.errors,
-    parseErrors: parser.errors,
-  };
+    if (parser.errors.length) {
+      return Maybe.fail(
+        parser.errors.map(
+          ({ message }: IRecognitionException) => new KugoError(message),
+        ),
+      );
+    }
+
+    return Maybe.just({
+      ast: toAstVisitorInstance.visit(cst),
+      // This is a pure grammar, the value will be undefined until we add embedded actions
+      // or enable automatic CST creation.
+      cst,
+    });
+  });
 }

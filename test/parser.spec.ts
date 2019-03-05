@@ -67,8 +67,13 @@ describe("Parser", () => {
       [`\n  \nfst a b = a\n\nsnd a b = b\n  \n `, apps([fst, snd])],
     ];
 
-    cases.forEach(([file, ast]) => {
-      expect(parseKugoFile(file).ast).toEqual(ast);
+    cases.forEach(([file, expectAst]) => {
+      parseKugoFile(file).with(
+        ({ ast }) => expect(ast).toEqual(expectAst),
+        () => {
+          throw new Error(`failed with ${expectAst}`);
+        },
+      );
     });
   });
 });

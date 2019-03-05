@@ -27,7 +27,7 @@
 
     /* Strict Type-Checking Options */
     /* Enable all strict type-checking options. */
-    "strict": true,
+    "strict": false,
     // "noImplicitAny": true,                 /* Raise error on expressions and declarations with an implied 'any' type. */
     // "strictNullChecks": true,              /* Enable strict null checks. */
     // "strictFunctionTypes": true,           /* Enable strict checking of function types. */
@@ -35,7 +35,7 @@
     // "strictPropertyInitialization": true,  /* Enable strict checking of property initialization in classes. */
     // "noImplicitThis": true,                /* Raise error on 'this' expressions with an implied 'any' type. */
     /* Parse in strict mode and emit "use strict" for each source file. */
-    "alwaysStrict": true,
+    "alwaysStrict": false,
 
     /* Additional Checks */
     // "noUnusedLocals": true,                /* Report errors on unused locals. */
