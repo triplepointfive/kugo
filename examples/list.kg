@@ -1,3 +1,0 @@
-safeHead xs
-  | null xs = 0
-  | _       = head xs

@@ -1,3 +1,0 @@
-sumArithmetic a n = div (prod n (sum a (prod a n))) 2
-lim n l = sumArithmetic n (div (subst l 1) n)
-main = subst (sum (lim 3 1000) (lim 5 1000)) (lim 15 1000)
