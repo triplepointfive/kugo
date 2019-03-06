@@ -28,8 +28,7 @@ const expectEval = (file: string, result: string): void => {
 
 it("multiline", () => {
   expectEval("main\n  = -3", "-3");
-  // expectEval("main =\n  div 10 2", "5");
-  // expectEval("main =\n  sum\n    10\n    2", "12");
+  expectEval("\n\nmain\n  = 5\n\n", "5");
 });
 
 describe("raw values", () => {
@@ -51,13 +50,13 @@ describe("built in", () => {
 });
 
 describe("functions", () => {
-  it.skip("args", () => {
+  it("args", () => {
     expectEval("const a b = a\nmain = const 1 3", "1");
   });
 });
 
 describe("errors", () => {
-  it.skip("not resolving", () => {
+  it("not resolving", () => {
     expectEval("three = 3", "Function main is not found");
     expectEval("three = two\nmain = three", "Function two is not found");
   });

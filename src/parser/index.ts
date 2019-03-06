@@ -17,7 +17,7 @@ interface ParseResult {
 
 export function parseKugoFile(text: string): Maybe<ParseResult> {
   // setting a new input will RESET the parser instance's state.
-  return tokenize(text).map(({ tokens, groups }) => {
+  return tokenize(text).map(({ tokens }) => {
     parser.input = tokens;
 
     const cst = parser.app();

@@ -6,13 +6,16 @@ import {
   Define,
   Identity,
   Indent,
+  NewLine,
   OpenParentheses,
   Outdent,
 } from "./Lexer";
 
 export class KugoParser extends Parser {
   public app = this.RULE("app", () => {
-    this.MANY2({
+    this.MANY_SEP({
+      SEP: NewLine,
+      // tslint:disable-next-line: object-literal-sort-keys
       DEF: () => this.SUBRULE(this.functionDeclaration),
     });
   });
