@@ -5,25 +5,16 @@ import {
   Const,
   Define,
   Identity,
-  NewLine,
-  OpenParentheses,
   Indent,
+  OpenParentheses,
   Outdent,
 } from "./Lexer";
 
 export class KugoParser extends Parser {
   public app = this.RULE("app", () => {
-    // this.MANY1({
-    //   DEF: () => this.CONSUME1(NewLine),
-    // });
-
     this.MANY2({
       DEF: () => this.SUBRULE(this.functionDeclaration),
     });
-
-    // this.MANY3({
-    //   DEF: () => this.CONSUME2(NewLine),
-    // });
   });
 
   private functionDeclaration = this.RULE("functionDeclaration", () => {
@@ -74,7 +65,6 @@ export class KugoParser extends Parser {
   private functionArg = this.RULE("functionArg", () => {
     this.OR([
       {
-        // tslint:disable-next-line:no-identical-functions
         ALT: () => {
           this.CONSUME(OpenParentheses);
           this.SUBRULE(this.expression);

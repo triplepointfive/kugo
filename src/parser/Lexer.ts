@@ -1,6 +1,7 @@
 import {
   createToken,
   createTokenInstance,
+  ICustomPattern,
   ILexingError,
   ILexingResult,
   IToken,
@@ -10,128 +11,149 @@ import _ from "lodash";
 import { KugoError } from "..";
 import { Maybe } from "../utils/Maybe";
 
-/**
- *
- * Works like a / +/y regExp.
- *  - Note the usage of the 'y' (sticky) flag.
- *    This can be used to match from a specific offset in the text
- *    in our case from startOffset.
- *
- * The reason this has been implemented "manually" is because the sticky flag is not supported
- * on all modern node.js versions (4.0 specifically).
- */
-function matchWhiteSpace(text: string, startOffset: number): null | string[] {
-  let result = "";
-  let offset = startOffset;
-  // ignoring tabs in this example
-  while (text[offset] === " ") {
-    offset++;
-    result += " ";
-  }
+class IndentParser implements ICustomPattern {
+  public static indentStack = [0];
+  public static lastOffsetChecked?: number;
 
-  if (result === "") {
-    return null;
-  }
+  public exec(
+    text: string,
+    offset: number,
+    matchedTokens?: IToken[],
+    groups?: { [groupName: string]: IToken[] },
+  ): RegExpExecArray | null {
+    // indentation can only be matched at the start of a line.
+    if (!this.isFirstLineOrStartOfLine(matchedTokens, groups)) {
+      return null;
+    }
 
-  return [result];
-}
-
-let indentStack = [0];
-let lastOffsetChecked: number | undefined;
-
-/**
- * This custom Token matcher uses Lexer context ("matchedTokens" and "groups" arguments)
- * combined with state via closure ("indentStack" and "lastTextMatched") to match indentation.
- *
- * @param {string} text - remaining text to lex, sent by the Chevrotain lexer.
- * @param {IToken[]} matchedTokens - Tokens lexed so far, sent by the Chevrotain Lexer.
- * @param {object} groups - Token groups already lexed, sent by the Chevrotain Lexer.
- * @param {string} type - determines if this function matches Indent or Outdent tokens.
- * @returns {*}
- */
-function matchIndentBase(
-  text: string,
-  offset: number,
-  matchedTokens: IToken[],
-  groups: any,
-  type: string,
-) {
-  const noTokensMatchedYet = _.isEmpty(matchedTokens);
-  const newLines: any[] = groups.nl;
-  const noNewLinesMatchedYet = _.isEmpty(newLines);
-  const isFirstLine = noTokensMatchedYet && noNewLinesMatchedYet;
-  const isStartOfLine =
-    // only newlines matched so far
-    (noTokensMatchedYet && !noNewLinesMatchedYet) ||
-    // Both newlines and other Tokens have been matched AND the last matched Token is a newline
-    (!noTokensMatchedYet &&
-      !noNewLinesMatchedYet &&
-      (!_.isEmpty(newLines) &&
-        !_.isEmpty(matchedTokens) &&
-        _.last(newLines).startOffset) > _.last(matchedTokens).startOffset);
-
-  // indentation can only be matched at the start of a line.
-  if (isFirstLine || isStartOfLine) {
     let match;
     let currIndentLevel;
     const isZeroIndent = text.length < offset && text[offset] !== " ";
     if (isZeroIndent) {
       // Matching zero spaces Outdent would not consume any chars, thus it would cause an infinite loop.
       // This check prevents matching a sequence of zero spaces outdents.
-      if (lastOffsetChecked !== offset) {
+      if (IndentParser.lastOffsetChecked !== offset) {
         currIndentLevel = 0;
         match = [""];
-        lastOffsetChecked = offset;
+        IndentParser.lastOffsetChecked = offset;
       }
     } else {
       // possible non-empty indentation
-      match = matchWhiteSpace(text, offset);
+      match = this.matchWhiteSpace(text, offset);
       if (match !== null) {
         currIndentLevel = match[0].length;
       }
     }
 
-    if (currIndentLevel !== undefined) {
-      const lastIndentLevel = _.last(indentStack);
-      if (lastIndentLevel === undefined) {
-        return null;
-      }
-
-      if (currIndentLevel > lastIndentLevel && type === "indent") {
-        indentStack.push(currIndentLevel);
-        return match;
-      } else if (currIndentLevel < lastIndentLevel && type === "outdent") {
-        // if we need more than one outdent token, add all but the last one
-        if (indentStack.length > 2) {
-          while (
-            indentStack.length > 2 &&
-            // stop before the last Outdent
-            indentStack[indentStack.length - 2] > currIndentLevel
-          ) {
-            indentStack.pop();
-            matchedTokens.push(
-              createTokenInstance(Outdent, "", NaN, NaN, NaN, NaN, NaN, NaN),
-            );
-          }
-        }
-        indentStack.pop();
-        return match;
-      } else {
-        // same indent, this should be lexed as simple whitespace and ignored
-        return null;
-      }
-    } else {
+    const lastIndentLevel = _.last(IndentParser.indentStack);
+    if (lastIndentLevel === undefined || currIndentLevel === undefined) {
       // indentation cannot be matched without at least one space character.
       return null;
     }
-  } else {
-    // indentation cannot be matched under other circumstances
-    return null;
+
+    // same indent, this should be lexed as simple whitespace and ignored
+    return this.withIndentLevel(currIndentLevel, lastIndentLevel, match);
+  }
+
+  protected withIndentLevel(
+    currIndentLevel: number,
+    lastIndentLevel: number,
+    match: any,
+  ): RegExpExecArray | null {
+    if (currIndentLevel < lastIndentLevel) {
+      return null;
+    }
+
+    IndentParser.indentStack.push(currIndentLevel);
+    return match as RegExpExecArray;
+  }
+
+  private isFirstLineOrStartOfLine(
+    matchedTokens?: IToken[],
+    groups?: { [groupName: string]: IToken[] },
+  ): boolean {
+    const noTokensMatchedYet = _.isEmpty(matchedTokens);
+    const newLines: IToken[] = groups ? groups.nl : [];
+    const noNewLinesMatchedYet = _.isEmpty(newLines);
+    const isFirstLine = noTokensMatchedYet && noNewLinesMatchedYet;
+
+    const lastToken = _.last(matchedTokens);
+    const lastNewLine = _.last(newLines);
+
+    const isStartOfLine =
+      // only newlines matched so far
+      (noTokensMatchedYet && !noNewLinesMatchedYet) ||
+      // Both newlines and other Tokens have been matched AND the last matched Token is a newline
+      (!noTokensMatchedYet &&
+        !noNewLinesMatchedYet &&
+        (!_.isEmpty(newLines) &&
+          !_.isEmpty(matchedTokens) &&
+          lastToken &&
+          lastNewLine &&
+          lastNewLine.startOffset > lastToken.startOffset));
+
+    return !!(isFirstLine || isStartOfLine);
+  }
+
+  /**
+   *
+   * Works like a / +/y regExp.
+   *  - Note the usage of the 'y' (sticky) flag.
+   *    This can be used to match from a specific offset in the text
+   *    in our case from startOffset.
+   *
+   * The reason this has been implemented "manually" is because the sticky flag is not supported
+   * on all modern node.js versions (4.0 specifically).
+   */
+  private matchWhiteSpace(text: string, startOffset: number): null | string[] {
+    let result = "";
+    let offset = startOffset;
+    // ignoring tabs in this example
+    while (text[offset] === " ") {
+      offset++;
+      result += " ";
+    }
+
+    if (result === "") {
+      return null;
+    }
+
+    return [result];
   }
 }
 
-const matchIndent = _.partialRight(matchIndentBase, "indent");
-const matchOutdent = _.partialRight(matchIndentBase, "outdent");
+// tslint:disable-next-line: max-classes-per-file
+class OutdentParser extends IndentParser {
+  protected withIndentLevel(
+    currIndentLevel: number,
+    lastIndentLevel: number,
+    match: any,
+    matchedTokens?: IToken[],
+  ): RegExpExecArray | null {
+    if (currIndentLevel > lastIndentLevel) {
+      return null;
+    }
+
+    while (
+      // if we need more than one outdent token, add all but the last one
+      IndentParser.indentStack.length > 2 &&
+      // stop before the last Outdent
+      IndentParser.indentStack[IndentParser.indentStack.length - 2] >
+        currIndentLevel
+    ) {
+      IndentParser.indentStack.pop();
+
+      if (matchedTokens) {
+        matchedTokens.push(
+          createTokenInstance(Outdent, "", NaN, NaN, NaN, NaN, NaN, NaN),
+        );
+      }
+    }
+
+    IndentParser.indentStack.pop();
+    return match as RegExpExecArray;
+  }
+}
 
 export const Const = createToken({
   name: "Const",
@@ -168,14 +190,14 @@ export const Indent = createToken({
   // custom token patterns should explicitly specify the line_breaks option
   line_breaks: false,
   name: "Indent",
-  pattern: matchIndent,
+  pattern: (...args) => new IndentParser().exec(...args),
 });
 
 export const Outdent = createToken({
   // custom token patterns should explicitly specify the line_breaks option
   line_breaks: false,
   name: "Outdent",
-  pattern: matchOutdent,
+  pattern: (...args) => new OutdentParser().exec(...args),
 });
 
 export const allTokens = [
@@ -196,17 +218,17 @@ export const allTokens = [
 const KugoLexer = new Lexer(allTokens, { ensureOptimizations: false });
 
 export function tokenize(text: string): Maybe<ILexingResult> {
-  indentStack = [0];
-  lastOffsetChecked = undefined;
+  IndentParser.indentStack = [0];
+  IndentParser.lastOffsetChecked = undefined;
 
   const lexResult = KugoLexer.tokenize(text);
 
   // add remaining Outdents
-  while (indentStack.length > 1) {
+  while (IndentParser.indentStack.length > 1) {
     lexResult.tokens.push(
       createTokenInstance(Outdent, "", NaN, NaN, NaN, NaN, NaN, NaN),
     );
-    indentStack.pop();
+    IndentParser.indentStack.pop();
   }
 
   if (lexResult.errors.length > 0) {

@@ -9,7 +9,7 @@ import { KugoParser } from "./Parser";
 const parserInstance = new KugoParser();
 const BaseKugoVisitor = parserInstance.getBaseCstVisitorConstructor();
 
-export class KugoToAstVisitor extends BaseKugoVisitor {
+export class CstVisitor extends BaseKugoVisitor {
   constructor() {
     super();
     this.validateVisitor();

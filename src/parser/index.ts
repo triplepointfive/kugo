@@ -2,13 +2,13 @@ import { IRecognitionException } from "chevrotain";
 import { KugoError } from "../core/KugoError";
 import { Maybe } from "../utils/Maybe";
 import { PApp } from "./AST";
-import { KugoToAstVisitor } from "./CstVisitor";
+import { CstVisitor } from "./CstVisitor";
 import { tokenize } from "./Lexer";
 import { KugoParser } from "./Parser";
 
 // reuse the same parser instance.
 const parser = new KugoParser();
-const toAstVisitorInstance = new KugoToAstVisitor();
+const toAstVisitorInstance = new CstVisitor();
 
 interface ParseResult {
   ast: PApp;
@@ -17,7 +17,7 @@ interface ParseResult {
 
 export function parseKugoFile(text: string): Maybe<ParseResult> {
   // setting a new input will RESET the parser instance's state.
-  return tokenize(text).map(({ tokens }) => {
+  return tokenize(text).map(({ tokens, groups }) => {
     parser.input = tokens;
 
     const cst = parser.app();

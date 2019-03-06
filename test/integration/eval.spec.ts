@@ -28,6 +28,8 @@ const expectEval = (file: string, result: string): void => {
 
 it("multiline", () => {
   expectEval("main\n  = -3", "-3");
+  // expectEval("main =\n  div 10 2", "5");
+  // expectEval("main =\n  sum\n    10\n    2", "12");
 });
 
 describe("raw values", () => {

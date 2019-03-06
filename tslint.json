@@ -6,6 +6,7 @@
   "rules": {
     "no-console": false,
     "arrow-parens": [true, "ban-single-arg-parens"],
-    "interface-name": [true, "never-prefix"]
+    "interface-name": [true, "never-prefix"],
+    "no-identical-functions": false
   }
 }
