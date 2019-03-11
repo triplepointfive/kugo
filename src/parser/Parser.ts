@@ -8,7 +8,9 @@ import {
   Indent,
   NewLine,
   OpenParentheses,
+  Operator,
   Outdent,
+  VerticalBar,
 } from "./Lexer";
 
 export class KugoParser extends Parser {
@@ -28,6 +30,15 @@ export class KugoParser extends Parser {
     });
 
     this.OR([
+      {
+        ALT: () => {
+          this.CONSUME1(Indent);
+          this.AT_LEAST_ONE(() => {
+            this.SUBRULE2(this.guardClause);
+          });
+          this.CONSUME1(Outdent);
+        },
+      },
       { ALT: () => this.SUBRULE(this.functionDeclarationBody) },
       {
         ALT: () => {
@@ -37,6 +48,14 @@ export class KugoParser extends Parser {
         },
       },
     ]);
+  });
+
+  private guardClause = this.RULE("guardClause", () => {
+    this.CONSUME(VerticalBar);
+    this.CONSUME(Identity);
+    this.CONSUME(Operator);
+    this.CONSUME(Const);
+    this.SUBRULE(this.functionDeclarationBody);
   });
 
   private functionDeclarationBody = this.RULE("functionDeclarationBody", () => {

@@ -8,9 +8,7 @@ import {
 import _ from "lodash";
 import { KugoError } from "../..";
 import { Maybe } from "../../utils/Maybe";
-import { DecreaseIndentParser } from "./DecreaseIndentParser";
-import { IncreaseIndentParser } from "./IncreaseIndentParser";
-import { IndentParser } from "./IndentParser";
+import { execIndent, indentationLevels, reset } from "./IndentParser";
 
 export const Const = createToken({
   name: "Const",
@@ -20,14 +18,20 @@ export const Identity = createToken({
   name: "Identity",
   pattern: /[a-zA-Z]+\w*/,
 });
-export const Define = createToken({ name: "Define", pattern: /=/ });
+export const Operator = createToken({
+  name: "Operator",
+  pattern: /(>|==|<)/,
+});
+
+export const Define = createToken({ name: "Define", pattern: "=" });
+export const VerticalBar = createToken({ name: "VerticalBar", pattern: "|" });
 export const OpenParentheses = createToken({
   name: "OpenParentheses",
-  pattern: /\(/,
+  pattern: "(",
 });
 export const CloseParentheses = createToken({
   name: "CloseParentheses",
-  pattern: /\)/,
+  pattern: ")",
 });
 
 export const Spaces = createToken({
@@ -47,14 +51,14 @@ export const Indent = createToken({
   // custom token patterns should explicitly specify the line_breaks option
   line_breaks: false,
   name: "Indent",
-  pattern: (...args) => new IncreaseIndentParser().exec(...args),
+  pattern: (...args) => execIndent("indent", ...args),
 });
 
 export const Outdent = createToken({
   // custom token patterns should explicitly specify the line_breaks option
   line_breaks: false,
   name: "Outdent",
-  pattern: (...args) => new DecreaseIndentParser().exec(...args),
+  pattern: (...args) => execIndent("outdent", ...args),
 });
 
 export const allTokens = [
@@ -69,22 +73,23 @@ export const allTokens = [
   Const,
   OpenParentheses,
   CloseParentheses,
+  Operator,
   Define,
+  VerticalBar,
 ];
 
 const KugoLexer = new Lexer(allTokens, { ensureOptimizations: false });
 
 export function tokenize(text: string): Maybe<ILexingResult> {
-  IndentParser.reset();
-
+  reset();
   const lexResult = KugoLexer.tokenize(text);
 
   // add remaining Outdents
-  while (IndentParser.indentStack.length > 1) {
+  while (indentationLevels.length > 1) {
     lexResult.tokens.push(
       createTokenInstance(Outdent, "", NaN, NaN, NaN, NaN, NaN, NaN),
     );
-    IndentParser.indentStack.pop();
+    indentationLevels.pop();
   }
 
   if (lexResult.errors.length > 0) {

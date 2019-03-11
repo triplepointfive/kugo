@@ -31,6 +31,10 @@ export class CstVisitor extends BaseKugoVisitor {
     );
   }
 
+  public guardClause(ctx: any): any {
+    console.log("guardClause", ctx);
+  }
+
   public functionDeclarationBody(ctx: any): any {
     return this.visit(ctx.expression);
   }

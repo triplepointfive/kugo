@@ -1,3 +1,2 @@
-const a b = a
-three x = 3
-main = div 10 0
+main
+  = div 10 0
