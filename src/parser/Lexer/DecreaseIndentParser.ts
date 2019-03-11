@@ -9,7 +9,7 @@ export class DecreaseIndentParser extends IndentParser {
     match: any,
     matchedTokens?: IToken[],
   ): RegExpExecArray | null {
-    if (currIndentLevel > lastIndentLevel) {
+    if (currIndentLevel >= lastIndentLevel) {
       return null;
     }
 

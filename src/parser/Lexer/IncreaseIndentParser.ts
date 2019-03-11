@@ -29,7 +29,7 @@ export class IncreaseIndentParser extends IndentParser {
     lastIndentLevel: number,
     match: any,
   ): RegExpExecArray | null {
-    if (currIndentLevel < lastIndentLevel) {
+    if (currIndentLevel <= lastIndentLevel) {
       return null;
     }
 
