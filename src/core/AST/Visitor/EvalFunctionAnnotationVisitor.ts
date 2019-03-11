@@ -33,6 +33,7 @@ export class EvalFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
   }
 
   public visitAdded(fa: AddedFunctionAnnotation): Maybe<Value> {
-    return fa.body.visit(new EvalAstVisitor(this.context));
+    // TODO: Lookup for matching guard
+    return fa.guards[0].body.visit(new EvalAstVisitor(this.context));
   }
 }

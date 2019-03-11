@@ -4,6 +4,7 @@ import { CallPExpression } from "./AST/CallPExpression";
 import { NumberPExpression } from "./AST/NumberPExpression";
 import { PExpression } from "./AST/PExpression";
 import { PFunctionDeclaration } from "./AST/PFunctionDeclaration";
+import { EmptyPGuard } from "./AST/PGuard";
 import { KugoParser } from "./Parser";
 
 const parserInstance = new KugoParser();
@@ -27,7 +28,7 @@ export class CstVisitor extends BaseKugoVisitor {
     return new PFunctionDeclaration(
       ctx.Identity[0].image,
       tail(ctx.Identity).map((token: any): string => token.image),
-      this.visit(ctx.functionDeclarationBody),
+      [new EmptyPGuard(this.visit(ctx.functionDeclarationBody))],
     );
   }
 

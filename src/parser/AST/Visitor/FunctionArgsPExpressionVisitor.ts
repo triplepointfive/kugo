@@ -1,3 +1,4 @@
+import { reduce } from "lodash";
 import {
   AnyMetaType,
   CallPExpression,
@@ -19,8 +20,21 @@ export class FunctionArgsPExpressionVisitor extends PExpressionVisitor<
     context: Context,
     functionDeclaration: PFunctionDeclaration,
   ): Maybe<FunctionArgs> {
-    const args: FunctionArgs = functionDeclaration.expression.visit(
-      new FunctionArgsPExpressionVisitor(context, functionDeclaration),
+    const initArgs = functionDeclaration.args.map(
+      (name: string, i: number): Arg => {
+        return { name, type: new AnyMetaType(i) };
+      },
+    );
+
+    // TODO: Also check bounds given with guards
+    const args: FunctionArgs = reduce(
+      functionDeclaration.guards,
+      (accArgs, guard) => {
+        return guard.expression.visit(
+          new FunctionArgsPExpressionVisitor(context, accArgs),
+        );
+      },
+      initArgs,
     );
 
     // TODO: Check invalid types better
@@ -42,20 +56,10 @@ export class FunctionArgsPExpressionVisitor extends PExpressionVisitor<
     return Maybe.just(args);
   }
 
-  private args: FunctionArgs;
   private argType?: MetaType;
 
-  protected constructor(
-    private context: Context,
-    { args }: PFunctionDeclaration,
-  ) {
+  protected constructor(private context: Context, private args: FunctionArgs) {
     super();
-
-    this.args = args.map(
-      (name: string, i: number): Arg => {
-        return { name, type: new AnyMetaType(i) };
-      },
-    );
   }
 
   public visitFunctionCall({ name, args }: CallPExpression): FunctionArgs {

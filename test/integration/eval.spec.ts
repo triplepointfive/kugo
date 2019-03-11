@@ -49,6 +49,12 @@ describe("built in", () => {
   });
 });
 
+describe("guards", () => {
+  it.skip("args", () => {
+    expectEval(`sign i\n  | i == 0 = 1\nmain = sign 0`, "1");
+  });
+});
+
 describe("functions", () => {
   it("args", () => {
     expectEval("const a b = a\nmain = const 1 3", "1");

@@ -1,14 +1,16 @@
+import { concat, reduce } from "lodash";
 import { PApp } from "../parser/AST";
 import { BuildAstPExpressionVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisitor";
 import { FunctionArgsPExpressionVisitor } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
 import { ReturnTypePExpressionVisitor } from "../parser/AST/Visitor/ReturnTypePExpressionVisitor";
 import { Maybe } from "../utils/Maybe";
-import { NExpression, Value } from "./AST";
+import { Value } from "./AST";
 import { AddedFunctionAnnotation } from "./AST/AddedFunctionAnnotation";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
-import { EvalAstVisitor } from "./AST/Visitor/EvalAstVisitor";
+import { EmptyNGuard, NGuard } from "./AST/NGuard";
 import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
 import { TypeCheckFunctionAnnotationVisitor } from "./AST/Visitor/TypeCheckFunctionAnnotationVisitor";
+import { KugoError } from "./KugoError";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
@@ -24,17 +26,45 @@ export class Context {
     const ctx = new Context(new Map([...this.global]), this.local);
 
     for (const fd of functionDeclarations) {
-      const builtFa = FunctionArgsPExpressionVisitor.build(ctx, fd).map(args =>
-        fd.expression
-          .visit(new ReturnTypePExpressionVisitor(ctx, args))
-          .map(returnType =>
-            fd.expression
-              .visit(new BuildAstPExpressionVisitor())
-              .map(body =>
-                Maybe.just(new AddedFunctionAnnotation(args, returnType, body)),
+      const builtFa: Maybe<
+        FunctionAnnotation
+      > = FunctionArgsPExpressionVisitor.build(ctx, fd).map(args => {
+        const retTypeVisitor = new ReturnTypePExpressionVisitor(ctx, args);
+
+        const returnType = reduce(
+          fd.guards.map(({ expression }) => expression.visit(retTypeVisitor)),
+          (accReturnType, guardRetType) => {
+            return guardRetType.map(type1 =>
+              accReturnType.map(type2 => Maybe.just(type1.union(type2))),
+            );
+          },
+        );
+
+        if (returnType === undefined) {
+          return Maybe.fail(
+            new KugoError(`Function ${fd.name} has not guards`),
+          );
+        }
+
+        return returnType.map(retType => {
+          const guards: Maybe<NGuard[]> = reduce(
+            fd.guards.map(({ expression }) =>
+              expression.visit(new BuildAstPExpressionVisitor()),
+            ),
+            (accBodies: Maybe<NGuard[]>, body) =>
+              body.map(bd =>
+                accBodies.map(bodies =>
+                  Maybe.just(concat(bodies, [new EmptyNGuard(bd)])),
+                ),
               ),
-          ),
-      );
+            Maybe.just([]),
+          );
+
+          return guards.map(gs =>
+            Maybe.just(new AddedFunctionAnnotation(args, retType, gs)),
+          );
+        });
+      });
 
       if (builtFa.failed) {
         return Maybe.fail(builtFa.errors);

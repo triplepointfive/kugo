@@ -1,14 +1,14 @@
+import { foldl1 } from "../../../utils";
 import { Maybe } from "../../../utils/Maybe";
 import { Context } from "../../Context";
 import { KugoError } from "../../KugoError";
-import { MetaType } from "../../Type/Meta";
 import { AddedFunctionAnnotation } from "../AddedFunctionAnnotation";
 import { BuiltInFunctionAnnotation } from "../BuiltInFunctionAnnotation";
 import { FunctionAnnotationVisitor } from "./FunctionAnnotationVisitor";
 import { TypeCheckAstVisitor } from "./TypeCheckAstVisitor";
 
 export class TypeCheckFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
-  Maybe<MetaType>
+  Maybe<undefined>
 > {
   public static check(context: Context): Maybe<undefined> {
     let errors: KugoError[] = [];
@@ -32,11 +32,16 @@ export class TypeCheckFunctionAnnotationVisitor extends FunctionAnnotationVisito
     super(context);
   }
 
-  public visitBuiltIn(fa: BuiltInFunctionAnnotation): Maybe<MetaType> {
-    return Maybe.just(fa.returnType);
+  public visitBuiltIn(fa: BuiltInFunctionAnnotation): Maybe<undefined> {
+    return Maybe.just(undefined);
   }
 
-  public visitAdded(fa: AddedFunctionAnnotation): Maybe<MetaType> {
-    return fa.body.visit(new TypeCheckAstVisitor(this.context, fa.args));
+  public visitAdded(fa: AddedFunctionAnnotation): Maybe<undefined> {
+    // TODO: Apply guard type restrictions here
+    return foldl1(
+      fa.guards.map(({ body }) =>
+        body.visit(new TypeCheckAstVisitor(this.context, fa.args)),
+      ),
+    ).map(() => Maybe.just(undefined));
   }
 }

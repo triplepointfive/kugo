@@ -1,13 +1,14 @@
-import { FunctionArgs, NExpression } from ".";
+import { FunctionArgs } from ".";
 import { MetaType } from "../..";
 import { FunctionAnnotation } from "./FunctionAnnotation";
+import { NGuard } from "./NGuard";
 import { FunctionAnnotationVisitor } from "./Visitor/FunctionAnnotationVisitor";
 
 export class AddedFunctionAnnotation extends FunctionAnnotation {
   constructor(
     args: FunctionArgs,
     returnType: MetaType,
-    public readonly body: NExpression,
+    public guards: NGuard[],
   ) {
     super(args, returnType);
   }
