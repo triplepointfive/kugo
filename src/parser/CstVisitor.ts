@@ -4,7 +4,7 @@ import { CallPExpression } from "./AST/CallPExpression";
 import { NumberPExpression } from "./AST/NumberPExpression";
 import { PExpression } from "./AST/PExpression";
 import { PFunctionDeclaration } from "./AST/PFunctionDeclaration";
-import { EmptyPGuard } from "./AST/PGuard";
+import { ConditionPGuard, EmptyPGuard, EqualPPredicate } from "./AST/PGuard";
 import { KugoParser } from "./Parser";
 
 const parserInstance = new KugoParser();
@@ -25,15 +25,26 @@ export class CstVisitor extends BaseKugoVisitor {
   }
 
   public functionDeclaration(ctx: any): PFunctionDeclaration {
+    let body = [];
+
+    if (ctx.functionDeclarationBody !== undefined) {
+      body = [new EmptyPGuard(this.visit(ctx.functionDeclarationBody))];
+    } else {
+      body = ctx.guardClause.map((clause: any) => this.visit(clause));
+    }
+
     return new PFunctionDeclaration(
       ctx.Identity[0].image,
       tail(ctx.Identity).map((token: any): string => token.image),
-      [new EmptyPGuard(this.visit(ctx.functionDeclarationBody))],
+      body,
     );
   }
 
   public guardClause(ctx: any): any {
-    console.log("guardClause", ctx);
+    return new ConditionPGuard(
+      this.buildPredicate(ctx),
+      this.visit(ctx.functionDeclarationBody),
+    );
   }
 
   public functionDeclarationBody(ctx: any): any {
@@ -69,8 +80,12 @@ export class CstVisitor extends BaseKugoVisitor {
     }
   }
 
-  private buildConst(ctx: any): PExpression {
+  private buildConst(ctx: any): NumberPExpression {
     // TODO: It's not always an integer
     return new NumberPExpression(parseInt(ctx.Const[0].image, 10));
+  }
+
+  private buildPredicate(ctx: any): EqualPPredicate {
+    return new EqualPPredicate(ctx.Identity[0].image, this.buildConst(ctx));
   }
 }

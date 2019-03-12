@@ -1,13 +1,13 @@
 import { concat, reduce } from "lodash";
 import { PApp } from "../parser/AST";
-import { BuildAstPExpressionVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisitor";
+import { BuildGuardVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisitor";
 import { FunctionArgsPExpressionVisitor } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
 import { ReturnTypePExpressionVisitor } from "../parser/AST/Visitor/ReturnTypePExpressionVisitor";
 import { Maybe } from "../utils/Maybe";
 import { Value } from "./AST";
 import { AddedFunctionAnnotation } from "./AST/AddedFunctionAnnotation";
 import { FunctionAnnotation } from "./AST/FunctionAnnotation";
-import { EmptyNGuard, NGuard } from "./AST/NGuard";
+import { NGuard } from "./AST/NGuard";
 import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
 import { TypeCheckFunctionAnnotationVisitor } from "./AST/Visitor/TypeCheckFunctionAnnotationVisitor";
 import { KugoError } from "./KugoError";
@@ -48,14 +48,10 @@ export class Context {
 
         return returnType.map(retType => {
           const guards: Maybe<NGuard[]> = reduce(
-            fd.guards.map(({ expression }) =>
-              expression.visit(new BuildAstPExpressionVisitor()),
-            ),
+            fd.guards.map(guard => new BuildGuardVisitor(guard).build()),
             (accBodies: Maybe<NGuard[]>, body) =>
               body.map(bd =>
-                accBodies.map(bodies =>
-                  Maybe.just(concat(bodies, [new EmptyNGuard(bd)])),
-                ),
+                accBodies.map(bodies => Maybe.just(concat(bodies, [bd]))),
               ),
             Maybe.just([]),
           );

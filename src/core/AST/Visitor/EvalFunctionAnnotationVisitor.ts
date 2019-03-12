@@ -34,6 +34,12 @@ export class EvalFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
 
   public visitAdded(fa: AddedFunctionAnnotation): Maybe<Value> {
     // TODO: Lookup for matching guard
-    return fa.guards[0].body.visit(new EvalAstVisitor(this.context));
+    const guard = fa.guards.find(g => g.match(this.context));
+
+    if (guard !== undefined) {
+      return guard.body.visit(new EvalAstVisitor(this.context));
+    }
+
+    return Maybe.fail(new KugoError(`Guard lookup failed`));
   }
 }

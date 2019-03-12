@@ -1,2 +1,5 @@
-main
-  = div 10 0
+sign i
+  | i == 5 = 120
+  | i == 0 =   1
+
+main = sign 0

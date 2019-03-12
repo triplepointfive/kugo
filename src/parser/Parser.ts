@@ -33,8 +33,10 @@ export class KugoParser extends Parser {
       {
         ALT: () => {
           this.CONSUME1(Indent);
-          this.AT_LEAST_ONE(() => {
-            this.SUBRULE2(this.guardClause);
+          this.AT_LEAST_ONE_SEP({
+            SEP: NewLine,
+            // tslint:disable-next-line: object-literal-sort-keys
+            DEF: () => this.SUBRULE2(this.guardClause),
           });
           this.CONSUME1(Outdent);
         },
