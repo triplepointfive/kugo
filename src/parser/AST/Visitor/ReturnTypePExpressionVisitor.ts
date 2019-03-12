@@ -1,3 +1,4 @@
+import { reduce } from "lodash";
 import { Context } from "../../..";
 import { FunctionArgs } from "../../../core/AST";
 import { KugoError } from "../../../core/KugoError";
@@ -27,7 +28,19 @@ export class ReturnTypePExpressionVisitor extends PExpressionVisitor<
       );
     }
 
-    return Maybe.just(definedFunction.returnType);
+    // TODO: Filter types with input args
+    // TODO: Remove duplicity
+    const resultType = reduce(
+      definedFunction.types.map(({ result }) => result),
+      (acc, result) => acc.union(result),
+    );
+
+    if (resultType === undefined) {
+      return Maybe.fail(
+        new KugoError(`Function ${functionCall.name} has no return types`),
+      );
+    }
+    return Maybe.just(resultType);
   }
 
   public visitValue(value: NumberPExpression): Maybe<MetaType> {

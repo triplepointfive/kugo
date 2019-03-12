@@ -1,3 +1,4 @@
+import { reduce } from "lodash";
 import { FunctionArgs } from "..";
 import { FunctionAnnotation, KugoError } from "../../..";
 import { Maybe } from "../../../utils/Maybe";
@@ -38,21 +39,13 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
     fa: FunctionAnnotation,
   ): Maybe<MetaType> {
     const errors: KugoError[] = [];
+    const builtArgs: MetaType[] = [];
 
-    for (const [i, arg] of args.entries()) {
+    for (const arg of args) {
       const checkResult = arg.visit(this);
 
       checkResult.with(
-        expressionType => {
-          const expectedType = fa.args[i].type;
-          if (!IsSubsetMetaTypeVisitor.check(expressionType, expectedType)) {
-            errors.push(
-              new KugoError(
-                `${name}: expected ${i} arg of type ${expectedType.display()} but got ${expressionType.display()}`,
-              ),
-            );
-          }
-        },
+        expressionType => builtArgs.push(expressionType),
         checkErrors => errors.concat(checkErrors),
       );
     }
@@ -61,6 +54,50 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
       return Maybe.fail(errors);
     }
 
-    return Maybe.just(fa.returnType);
+    return this.withBuiltArgs(name, fa, builtArgs);
+  }
+
+  private withBuiltArgs(
+    name: string,
+    fa: FunctionAnnotation,
+    inputArgs: MetaType[],
+  ): Maybe<MetaType> {
+    let matchingFunctionTypes = fa.types;
+
+    for (const [i, actualType] of inputArgs.entries()) {
+      const filteredTypes = matchingFunctionTypes.filter(({ args }) =>
+        IsSubsetMetaTypeVisitor.check(actualType, args[i]),
+      );
+
+      if (filteredTypes.length === 0) {
+        const expectedType = reduce(
+          matchingFunctionTypes.map(({ args }) => args[i]),
+          (acc, result) => acc.union(result),
+        );
+
+        return Maybe.fail(
+          new KugoError(
+            `${name}: expected ${i} arg of type ${expectedType &&
+              expectedType.display()} but got ${actualType.display()}`,
+          ),
+        );
+      }
+
+      matchingFunctionTypes = filteredTypes;
+    }
+
+    const resultType = reduce(
+      fa.types
+        .filter(type => type.matchArgs(inputArgs))
+        .map(({ result }) => result),
+      (acc, result) => acc.union(result),
+    );
+
+    if (resultType === undefined) {
+      return Maybe.fail(
+        new KugoError(`Function ${name} has no matching types`),
+      );
+    }
+    return Maybe.just(resultType);
   }
 }

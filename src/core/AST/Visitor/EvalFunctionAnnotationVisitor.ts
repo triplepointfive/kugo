@@ -13,7 +13,7 @@ export class EvalFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
     const missed: string[] = [];
     const values: Value[] = [];
 
-    fa.args.forEach(({ name }) => {
+    fa.args.forEach(name => {
       const val = this.context.lookupLocal(name);
 
       if (val !== undefined) {

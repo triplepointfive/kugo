@@ -25,7 +25,7 @@ export class EvalAstVisitor extends AstVisitor<Maybe<Value>> {
       if (result.failed) {
         return Maybe.fail(result.errors);
       }
-      result.with(val => builtArgs.set(functionAnnotation.args[i].name, val));
+      result.with(val => builtArgs.set(functionAnnotation.args[i], val));
     }
 
     return functionAnnotation.visit(

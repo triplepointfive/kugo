@@ -50,8 +50,9 @@ describe("built in", () => {
 });
 
 describe("guards", () => {
-  it.skip("args", () => {
+  it("equal", () => {
     expectEval(`sign i\n  | i == 0 = 1\nmain = sign 0`, "1");
+    expectEval(`sign i\n  | i == 1 = 1\n  | i == 0 = 2\nmain = sign 0`, "2");
   });
 });
 
@@ -72,5 +73,8 @@ describe("errors", () => {
       "main = div 10 0",
       "div: expected 1 arg of type (-∞, -1] ∪ [1, +∞) but got 0",
     );
+
+    // expectEval(`sign i\n  | i == 0 = 1\nmain = sign 1`, "1");
+    // TODO: Same guard e.g. (== 1 & ==1)
   });
 });

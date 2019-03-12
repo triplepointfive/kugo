@@ -1,15 +1,14 @@
-import { FunctionArgs, Value } from ".";
-import { MetaType } from "../Type/Meta";
-import { FunctionAnnotation } from "./FunctionAnnotation";
+import { Value } from ".";
+import { FunctionAnnotation, FunctionType } from "./FunctionAnnotation";
 import { FunctionAnnotationVisitor } from "./Visitor/FunctionAnnotationVisitor";
 
 export class BuiltInFunctionAnnotation extends FunctionAnnotation {
   constructor(
-    args: FunctionArgs,
-    returnType: MetaType,
+    args: string[],
+    types: FunctionType[],
     public readonly body: (...args: any) => Value,
   ) {
-    super(args, returnType);
+    super(args, types);
   }
 
   public visit<T>(visitor: FunctionAnnotationVisitor<T>): T {

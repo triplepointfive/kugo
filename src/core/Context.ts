@@ -1,12 +1,12 @@
 import { concat, reduce } from "lodash";
 import { PApp } from "../parser/AST";
 import { BuildGuardVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisitor";
-import { FunctionArgsPExpressionVisitor } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
+import { buildArgs } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
 import { ReturnTypePExpressionVisitor } from "../parser/AST/Visitor/ReturnTypePExpressionVisitor";
 import { Maybe } from "../utils/Maybe";
 import { Value } from "./AST";
 import { AddedFunctionAnnotation } from "./AST/AddedFunctionAnnotation";
-import { FunctionAnnotation } from "./AST/FunctionAnnotation";
+import { FunctionAnnotation, FunctionType } from "./AST/FunctionAnnotation";
 import { NGuard } from "./AST/NGuard";
 import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
 import { TypeCheckFunctionAnnotationVisitor } from "./AST/Visitor/TypeCheckFunctionAnnotationVisitor";
@@ -26,41 +26,48 @@ export class Context {
     const ctx = new Context(new Map([...this.global]), this.local);
 
     for (const fd of functionDeclarations) {
-      const builtFa: Maybe<
-        FunctionAnnotation
-      > = FunctionArgsPExpressionVisitor.build(ctx, fd).map(args => {
-        const retTypeVisitor = new ReturnTypePExpressionVisitor(ctx, args);
+      const builtFa: Maybe<FunctionAnnotation> = buildArgs(ctx, fd).map(
+        args => {
+          const retTypeVisitor = new ReturnTypePExpressionVisitor(ctx, args);
 
-        const returnType = reduce(
-          fd.guards.map(({ expression }) => expression.visit(retTypeVisitor)),
-          (accReturnType, guardRetType) => {
-            return guardRetType.map(type1 =>
-              accReturnType.map(type2 => Maybe.just(type1.union(type2))),
+          const returnType = reduce(
+            fd.guards.map(({ expression }) => expression.visit(retTypeVisitor)),
+            (accReturnType, guardRetType) => {
+              return guardRetType.map(type1 =>
+                accReturnType.map(type2 => Maybe.just(type1.union(type2))),
+              );
+            },
+          );
+
+          if (returnType === undefined) {
+            return Maybe.fail(
+              new KugoError(`Function ${fd.name} has not guards`),
             );
-          },
-        );
+          }
 
-        if (returnType === undefined) {
-          return Maybe.fail(
-            new KugoError(`Function ${fd.name} has not guards`),
-          );
-        }
+          return returnType.map(retType => {
+            const guards: Maybe<NGuard[]> = reduce(
+              fd.guards.map(guard => new BuildGuardVisitor(guard).build()),
+              (accBodies: Maybe<NGuard[]>, body) =>
+                body.map(bd =>
+                  accBodies.map(bodies => Maybe.just(concat(bodies, [bd]))),
+                ),
+              Maybe.just([]),
+            );
 
-        return returnType.map(retType => {
-          const guards: Maybe<NGuard[]> = reduce(
-            fd.guards.map(guard => new BuildGuardVisitor(guard).build()),
-            (accBodies: Maybe<NGuard[]>, body) =>
-              body.map(bd =>
-                accBodies.map(bodies => Maybe.just(concat(bodies, [bd]))),
+            return guards.map(gs =>
+              Maybe.just(
+                new AddedFunctionAnnotation(
+                  args.map(({ name }) => name),
+                  // TODO: Allow to have multiple options
+                  [new FunctionType(args.map(({ type }) => type), retType)],
+                  gs,
+                ),
               ),
-            Maybe.just([]),
-          );
-
-          return guards.map(gs =>
-            Maybe.just(new AddedFunctionAnnotation(args, retType, gs)),
-          );
-        });
-      });
+            );
+          });
+        },
+      );
 
       if (builtFa.failed) {
         return Maybe.fail(builtFa.errors);

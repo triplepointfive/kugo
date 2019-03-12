@@ -7,16 +7,20 @@ import {
 import { MetaTypeVisitor } from "./MetaTypeVisitor";
 
 export class DisplayMetaTypeVisitor extends MetaTypeVisitor<string> {
-  public static build({ args, returnType }: FunctionAnnotation): string {
+  public static build({ types }: FunctionAnnotation): string {
     const visitor = new DisplayMetaTypeVisitor();
 
-    if (args.length) {
-      return `${args
-        .map(({ type }) => type.visit(visitor))
-        .join(" → ")} → ${returnType.visit(visitor)}`;
-    } else {
-      return returnType.visit(visitor);
-    }
+    return types
+      .map(({ args, result }) => {
+        if (args.length) {
+          return `${args
+            .map(type => type.visit(visitor))
+            .join(" → ")} → ${result.visit(visitor)}`;
+        } else {
+          return result.visit(visitor);
+        }
+      })
+      .join(" | ");
   }
 
   private anyChar: Map<number, string> = new Map();

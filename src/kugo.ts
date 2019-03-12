@@ -1,6 +1,9 @@
 import { Value } from "./core/AST";
 import { BuiltInFunctionAnnotation } from "./core/AST/BuiltInFunctionAnnotation";
-import { FunctionAnnotation } from "./core/AST/FunctionAnnotation";
+import {
+  FunctionAnnotation,
+  FunctionType,
+} from "./core/AST/FunctionAnnotation";
 import { Context } from "./core/Context";
 import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
@@ -12,39 +15,41 @@ export const Z = new UnionMetaType([
 ]);
 
 export const divBody = new BuiltInFunctionAnnotation(
+  ["a", "b"],
   [
-    { name: "a", type: Z },
-    {
-      name: "b",
-      type: new UnionMetaType([
-        new IntegerNumberType([
-          new IntegerNumberInterval({ upper: -1 }),
-          new IntegerNumberInterval({ bottom: 1 }),
+    new FunctionType(
+      [
+        Z,
+        new UnionMetaType([
+          new IntegerNumberType([
+            new IntegerNumberInterval({ upper: -1 }),
+            new IntegerNumberInterval({ bottom: 1 }),
+          ]),
         ]),
-      ]),
-    },
+      ],
+      Z,
+    ),
   ],
-  Z,
   (a: Value, b: Value) => Math.floor(a / b),
 );
 export const substBody = new BuiltInFunctionAnnotation(
-  [{ name: "a", type: Z }, { name: "b", type: Z }],
-  Z,
+  ["a", "b"],
+  [new FunctionType([Z, Z], Z)],
   (a: Value, b: Value) => a - b,
 );
 export const sumBody = new BuiltInFunctionAnnotation(
-  [{ name: "a", type: Z }, { name: "b", type: Z }],
-  Z,
+  ["a", "b"],
+  [new FunctionType([Z, Z], Z)],
   (a: Value, b: Value) => a + b,
 );
 export const prodBody = new BuiltInFunctionAnnotation(
-  [{ name: "a", type: Z }, { name: "b", type: Z }],
-  Z,
+  ["a", "b"],
+  [new FunctionType([Z, Z], Z)],
   (a: Value, b: Value) => a * b,
 );
 export const absBody = new BuiltInFunctionAnnotation(
-  [{ name: "v", type: Z }],
-  new UnionMetaType([new Natural0NumberType()]),
+  ["v"],
+  [new FunctionType([Z], new UnionMetaType([new Natural0NumberType()]))],
   (v: Value) => Math.abs(v),
 );
 

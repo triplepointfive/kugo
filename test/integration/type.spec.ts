@@ -21,17 +21,25 @@ const evalExp = (file: string, funcMain: string = "main") => {
   }
 };
 
-const expectEval = (file: string, funcName: string, result: string): void => {
+const expectEval = (
+  file: string,
+  result: string,
+  funcName: string = "main",
+): void => {
   expect(evalExp(file, funcName)).toEqual(result);
 };
 
 it("integer", () => {
-  expectEval("main = -3", "main", "-3");
-  expectEval("main a b = div a b", "main", "ℤ → (-∞, -1] ∪ [1, +∞) → ℤ");
-  expectEval("main a b = prod (sum a b) b", "main", "ℤ → ℤ → ℤ");
+  expectEval("main = -3", "-3");
+  expectEval("main a b = div a b", "ℤ → (-∞, -1] ∪ [1, +∞) → ℤ");
+  expectEval("main a b = prod (sum a b) b", "ℤ → ℤ → ℤ");
 });
 
 it("any", () => {
-  expectEval("fst a b = a", "fst", "a → b → a");
-  expectEval("snd a b = b", "snd", "a → b → b");
+  expectEval("fst a b = a", "a → b → a", "fst");
+  expectEval("snd a b = b", "a → b → b", "snd");
+});
+
+it.skip("guard", () => {
+  expectEval(`main i\n  | i == 0 = 1\n`, "1");
 });

@@ -13,52 +13,49 @@ import { NeverMetaType } from "../../../core/Type/Meta/NeverMetaType";
 import { Maybe } from "../../../utils/Maybe";
 import { PExpressionVisitor } from "./PExpressionVisitor";
 
-export class FunctionArgsPExpressionVisitor extends PExpressionVisitor<
-  FunctionArgs
-> {
-  public static build(
-    context: Context,
-    functionDeclaration: PFunctionDeclaration,
-  ): Maybe<FunctionArgs> {
-    const initArgs = functionDeclaration.args.map(
-      (name: string, i: number): Arg => {
-        return { name, type: new AnyMetaType(i) };
-      },
+export function buildArgs(
+  context: Context,
+  functionDeclaration: PFunctionDeclaration,
+): Maybe<FunctionArgs> {
+  const initArgs = functionDeclaration.args.map(
+    (name: string, i: number): Arg => {
+      return { name, type: new AnyMetaType(i) };
+    },
+  );
+
+  // TODO: Also check bounds given with guards
+  const args: FunctionArgs = reduce(
+    functionDeclaration.guards,
+    (accArgs, guard) =>
+      guard.expression.visit(
+        new FunctionArgsPExpressionVisitor(context, accArgs),
+      ),
+    initArgs,
+  );
+
+  // TODO: Check invalid types better
+  const neverArgs = args.filter(({ type }) => type instanceof NeverMetaType);
+
+  if (neverArgs.length) {
+    return Maybe.fail(
+      neverArgs.map(
+        ({ name, type }) =>
+          new KugoError(
+            `${
+              functionDeclaration.name
+            }: argument ${name} has type ${type.display()}`,
+          ),
+      ),
     );
-
-    // TODO: Also check bounds given with guards
-    const args: FunctionArgs = reduce(
-      functionDeclaration.guards,
-      (accArgs, guard) => {
-        return guard.expression.visit(
-          new FunctionArgsPExpressionVisitor(context, accArgs),
-        );
-      },
-      initArgs,
-    );
-
-    // TODO: Check invalid types better
-    const neverArgs = args.filter(({ type }) => type instanceof NeverMetaType);
-
-    if (neverArgs.length) {
-      return Maybe.fail(
-        neverArgs.map(
-          ({ name, type }) =>
-            new KugoError(
-              `${
-                functionDeclaration.name
-              }: argument ${name} has type ${type.display()}`,
-            ),
-        ),
-      );
-    }
-
-    return Maybe.just(args);
   }
 
+  return Maybe.just(args);
+}
+
+class FunctionArgsPExpressionVisitor extends PExpressionVisitor<FunctionArgs> {
   private argType?: MetaType;
 
-  protected constructor(private context: Context, private args: FunctionArgs) {
+  constructor(private context: Context, private args: FunctionArgs) {
     super();
   }
 
@@ -74,8 +71,11 @@ export class FunctionArgsPExpressionVisitor extends PExpressionVisitor<
     const functionDeclaration = this.context.lookupFunction(name);
     if (functionDeclaration) {
       args.forEach((arg, index) => {
-        this.argType = functionDeclaration.args[index].type;
-        arg.visit(this);
+        // TODO: Rethink what to do here
+        functionDeclaration.types.forEach(types => {
+          this.argType = types.args[index];
+          arg.visit(this);
+        });
       });
     }
 
