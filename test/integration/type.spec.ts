@@ -40,6 +40,7 @@ it("any", () => {
   expectEval("snd a b = b", "a → b → b", "snd");
 });
 
-it.skip("guard", () => {
-  expectEval(`main i\n  | i == 0 = 1\n`, "1");
+it("guard", () => {
+  expectEval(`main i\n  | i == 0 = 1\n`, "a → 1");
+  expectEval(`main i\n  | i == 0 = 1\n  | i == 1 = 2\n`, "a → 1 | a → 2");
 });

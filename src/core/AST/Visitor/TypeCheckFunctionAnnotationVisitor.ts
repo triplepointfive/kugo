@@ -1,4 +1,3 @@
-import { type } from "os";
 import { foldl1 } from "../../../utils";
 import { Maybe } from "../../../utils/Maybe";
 import { Context } from "../../Context";
