@@ -41,6 +41,6 @@ it("any", () => {
 });
 
 it("guard", () => {
-  expectEval(`main i\n  | i == 0 = 1\n`, "a → 1");
-  expectEval(`main i\n  | i == 0 = 1\n  | i == 1 = 2\n`, "a → 1 | a → 2");
+  expectEval(`main i\n  | i == 0 = 1\n`, "0 → 1");
+  expectEval(`main i\n  | i == 0 = 1\n  | i == 1 = 2\n`, "0 → 1 | 1 → 2");
 });

@@ -11,11 +11,13 @@ import { KugoError } from "../../../core/KugoError";
 import { MetaType } from "../../../core/Type/Meta";
 import { NeverMetaType } from "../../../core/Type/Meta/NeverMetaType";
 import { Maybe } from "../../../utils/Maybe";
+import { PGuard } from "../PGuard";
 import { PExpressionVisitor } from "./PExpressionVisitor";
 
 export function buildArgs(
   context: Context,
   functionDeclaration: PFunctionDeclaration,
+  guard: PGuard,
 ): Maybe<FunctionArgs> {
   const initArgs = functionDeclaration.args.map(
     (name: string, i: number): Arg => {
@@ -24,13 +26,11 @@ export function buildArgs(
   );
 
   // TODO: Also check bounds given with guards
-  const args: FunctionArgs = reduce(
-    functionDeclaration.guards,
-    (accArgs, guard) =>
-      guard.expression.visit(
-        new FunctionArgsPExpressionVisitor(context, accArgs),
-      ),
-    initArgs,
+  const args = guard.expression.visit(
+    new FunctionArgsPExpressionVisitor(
+      context,
+      guard.predicate.restrictArgs(initArgs),
+    ),
   );
 
   // TODO: Check invalid types better

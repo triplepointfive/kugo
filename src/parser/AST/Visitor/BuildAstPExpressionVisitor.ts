@@ -10,7 +10,7 @@ import {
 import { Maybe } from "../../../utils/Maybe";
 import { CallPExpression } from "../CallPExpression";
 import { NumberPExpression } from "../NumberPExpression";
-import { ConditionPGuard, EqualPPredicate, PGuard } from "../PGuard";
+import { EqualPPredicate, PGuard } from "../PGuard";
 import { PExpressionVisitor } from "./PExpressionVisitor";
 
 export class BuildAstPExpressionVisitor extends PExpressionVisitor<
@@ -44,12 +44,7 @@ export class BuildGuardVisitor {
   constructor(protected readonly guard: PGuard) {}
 
   public build(): Maybe<NGuard> {
-    if (this.guard instanceof ConditionPGuard) {
-      if (!(this.guard.predicate instanceof EqualPPredicate)) {
-        console.log(this.guard);
-        throw new Error("Implement visitor!");
-      }
-
+    if (this.guard.predicate instanceof EqualPPredicate) {
       const { variable, value } = this.guard.predicate;
 
       return this.guard.expression
@@ -69,10 +64,10 @@ export class BuildGuardVisitor {
               ),
             ),
         );
+    } else {
+      return this.guard.expression
+        .visit(new BuildAstPExpressionVisitor())
+        .map(body => Maybe.just(new EmptyNGuard(body)));
     }
-
-    return this.guard.expression
-      .visit(new BuildAstPExpressionVisitor())
-      .map(body => Maybe.just(new EmptyNGuard(body)));
   }
 }

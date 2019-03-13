@@ -4,7 +4,7 @@ import { CallPExpression } from "./AST/CallPExpression";
 import { NumberPExpression } from "./AST/NumberPExpression";
 import { PExpression } from "./AST/PExpression";
 import { PFunctionDeclaration } from "./AST/PFunctionDeclaration";
-import { ConditionPGuard, EmptyPGuard, EqualPPredicate } from "./AST/PGuard";
+import { ElsePPredicate, EqualPPredicate, PGuard } from "./AST/PGuard";
 import { KugoParser } from "./Parser";
 
 const parserInstance = new KugoParser();
@@ -28,7 +28,12 @@ export class CstVisitor extends BaseKugoVisitor {
     let body = [];
 
     if (ctx.functionDeclarationBody !== undefined) {
-      body = [new EmptyPGuard(this.visit(ctx.functionDeclarationBody))];
+      body = [
+        new PGuard(
+          new ElsePPredicate(),
+          this.visit(ctx.functionDeclarationBody),
+        ),
+      ];
     } else {
       body = ctx.guardClause.map((clause: any) => this.visit(clause));
     }
@@ -41,7 +46,7 @@ export class CstVisitor extends BaseKugoVisitor {
   }
 
   public guardClause(ctx: any): any {
-    return new ConditionPGuard(
+    return new PGuard(
       this.buildPredicate(ctx),
       this.visit(ctx.functionDeclarationBody),
     );

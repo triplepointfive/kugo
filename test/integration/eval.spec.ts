@@ -1,6 +1,8 @@
 import { builtInContext, KugoError, parseKugoFile } from "../../src";
 import { Maybe } from "../../src/utils/Maybe";
 
+const NOT_FOUND = "Function main is not found";
+
 const evalExp = (file: string) => {
   const evalCtx = parseKugoFile(file).map(({ ast }) => {
     const buildCtx = builtInContext.extend(ast);
@@ -10,7 +12,7 @@ const evalExp = (file: string) => {
       if (main) {
         return ctx.evalFunction(main);
       } else {
-        return Maybe.fail(new KugoError("Function main is not found"));
+        return Maybe.fail(new KugoError(NOT_FOUND));
       }
     });
   });
@@ -64,7 +66,8 @@ describe("functions", () => {
 
 describe("errors", () => {
   it("not resolving", () => {
-    expectEval("three = 3", "Function main is not found");
+    expectEval("\n", NOT_FOUND);
+    expectEval("three = 3", NOT_FOUND);
     expectEval("three = two\nmain = three", "Function two is not found");
   });
 
