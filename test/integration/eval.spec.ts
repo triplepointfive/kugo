@@ -74,10 +74,12 @@ describe("errors", () => {
   it("typecheck", () => {
     expectEval(
       "main = div 10 0",
-      "div: expected 1 arg of type (-∞, -1] ∪ [1, +∞) but got 0",
+      "div: expected 2 arg of type (-∞, -1] ∪ [1, +∞) but got 0",
     );
-
-    // expectEval(`sign i\n  | i == 0 = 1\nmain = sign 1`, "1");
+    expectEval(
+      `sign i\n  | i == 0 = 1\nmain = sign 1`,
+      "sign: expected 1 arg of type 0 but got 1",
+    );
     // TODO: Same guard e.g. (== 1 & ==1)
   });
 });

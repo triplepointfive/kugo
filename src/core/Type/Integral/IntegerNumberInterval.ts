@@ -17,13 +17,14 @@ export class IntegerNumberInterval {
     interval: IntegerNumberInterval,
   ): IntegerNumberInterval | undefined {
     const bottom =
-      this.bottom && interval.bottom
+      this.bottom !== undefined && interval.bottom !== undefined
         ? Math.max(this.bottom, interval.bottom)
         : this.bottom || interval.bottom;
     const upper =
-      this.upper && interval.upper
+      this.upper !== undefined && interval.upper !== undefined
         ? Math.min(this.upper, interval.upper)
         : this.upper || interval.upper;
+
     if (bottom !== undefined && upper !== undefined && bottom > upper) {
       return undefined;
     }
