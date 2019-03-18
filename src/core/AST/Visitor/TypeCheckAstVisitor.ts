@@ -78,7 +78,7 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
         return Maybe.fail(
           new KugoError(
             `${name}: expected ${i + 1} arg of type ${expectedType &&
-            expectedType.display()} but got ${actualType.display()}`,
+              expectedType.display()} but got ${actualType.display()}`,
           ),
         );
       }

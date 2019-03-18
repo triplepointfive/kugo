@@ -4,7 +4,14 @@ import { CallPExpression } from "./AST/CallPExpression";
 import { NumberPExpression } from "./AST/NumberPExpression";
 import { PExpression } from "./AST/PExpression";
 import { PFunctionDeclaration } from "./AST/PFunctionDeclaration";
-import { ElsePPredicate, EqualPPredicate, PGuard } from "./AST/PGuard";
+import {
+  ElsePPredicate,
+  EqualPPredicate,
+  LessPPredicate,
+  MorePPredicate,
+  PGuard,
+  PPredicate,
+} from "./AST/PGuard";
 import { KugoParser } from "./Parser";
 
 const parserInstance = new KugoParser();
@@ -90,7 +97,17 @@ export class CstVisitor extends BaseKugoVisitor {
     return new NumberPExpression(parseInt(ctx.Const[0].image, 10));
   }
 
-  private buildPredicate(ctx: any): EqualPPredicate {
-    return new EqualPPredicate(ctx.Identity[0].image, this.buildConst(ctx));
+  private buildPredicate(ctx: any): PPredicate {
+    const image = ctx.Identity[0].image;
+    switch (ctx.Operator[0].image) {
+      case "==":
+        return new EqualPPredicate(image, this.buildConst(ctx));
+      case ">":
+        return new MorePPredicate(image, this.buildConst(ctx));
+      case "<":
+        return new LessPPredicate(image, this.buildConst(ctx));
+    }
+
+    throw new Error(`Failed to parse operator ${ctx}`);
   }
 }

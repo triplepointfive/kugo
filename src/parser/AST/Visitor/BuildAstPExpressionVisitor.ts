@@ -1,16 +1,12 @@
 import { NExpression } from "../../../core/AST";
 import { NCall } from "../../../core/AST/NCall";
 import { NConstant } from "../../../core/AST/NConstant";
-import {
-  ConditionNGuard,
-  EmptyNGuard,
-  EqualNPredicate,
-  NGuard,
-} from "../../../core/AST/NGuard";
+import { NGuard } from "../../../core/AST/NGuard";
 import { Maybe } from "../../../utils/Maybe";
 import { CallPExpression } from "../CallPExpression";
 import { NumberPExpression } from "../NumberPExpression";
-import { EqualPPredicate, PGuard } from "../PGuard";
+import { PGuard } from "../PGuard";
+import { BuildNGuardVisitor } from "./BuildNGuardVisitor";
 import { PExpressionVisitor } from "./PExpressionVisitor";
 
 export class BuildAstPExpressionVisitor extends PExpressionVisitor<
@@ -33,9 +29,7 @@ export class BuildAstPExpressionVisitor extends PExpressionVisitor<
   }
 
   public visitValue(value: NumberPExpression): Maybe<NExpression> {
-    return value
-      .type()
-      .map(type => Maybe.just(new NConstant(value.value, type)));
+    return Maybe.just(new NConstant(value.value, value.type));
   }
 }
 
@@ -44,30 +38,15 @@ export class BuildGuardVisitor {
   constructor(protected readonly guard: PGuard) {}
 
   public build(): Maybe<NGuard> {
-    if (this.guard.predicate instanceof EqualPPredicate) {
-      const { variable, value } = this.guard.predicate;
-
-      return this.guard.expression
-        .visit(new BuildAstPExpressionVisitor())
-        .map(body =>
-          value
-            .type()
-            .map(type =>
-              Maybe.just(
-                new ConditionNGuard(
-                  new EqualNPredicate(
-                    variable,
-                    new NConstant(value.value, type),
-                  ),
-                  body,
-                ),
-              ),
-            ),
-        );
-    } else {
-      return this.guard.expression
-        .visit(new BuildAstPExpressionVisitor())
-        .map(body => Maybe.just(new EmptyNGuard(body)));
-    }
+    return this.guard.expression
+      .visit(new BuildAstPExpressionVisitor())
+      .map(body =>
+        Maybe.just(
+          new NGuard(
+            this.guard.predicate.visit(new BuildNGuardVisitor()),
+            body,
+          ),
+        ),
+      );
   }
 }

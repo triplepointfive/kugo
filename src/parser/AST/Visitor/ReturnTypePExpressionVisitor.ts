@@ -44,6 +44,6 @@ export class ReturnTypePExpressionVisitor extends PExpressionVisitor<
   }
 
   public visitValue(value: NumberPExpression): Maybe<MetaType> {
-    return value.type();
+    return Maybe.just(value.type);
   }
 }

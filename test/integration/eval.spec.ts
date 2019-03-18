@@ -56,6 +56,16 @@ describe("guards", () => {
     expectEval(`sign i\n  | i == 0 = 1\nmain = sign 0`, "1");
     expectEval(`sign i\n  | i == 1 = 1\n  | i == 0 = 2\nmain = sign 0`, "2");
   });
+
+  it("less", () => {
+    expectEval(`sign i\n  | i < 5 = 1\nmain = sign 2`, "1");
+    expectEval(`sign i\n  | i < 5 = 1\n  | i < 10 = 2\nmain = sign 8`, "2");
+  });
+
+  it("more", () => {
+    expectEval(`sign i\n  | i > 5 = 1\nmain = sign 7`, "1");
+    expectEval(`sign i\n  | i > 10 = 1\n  | i > 5 = 2\nmain = sign 7`, "2");
+  });
 });
 
 describe("functions", () => {
@@ -80,6 +90,6 @@ describe("errors", () => {
       `sign i\n  | i == 0 = 1\nmain = sign 1`,
       "sign: expected 1 arg of type 0 but got 1",
     );
-    // TODO: Same guard e.g. (== 1 & ==1)
+    // TODO: expectEval(`sign i\n  | i < 5 = 1\n  | i < 10 = 2\nmain = sign 12`, "2");
   });
 });

@@ -2,24 +2,12 @@ import { NExpression } from ".";
 import { Context } from "../Context";
 import { NConstant } from "./NConstant";
 
-export abstract class NGuard {
-  constructor(public readonly body: NExpression) {}
-
-  public abstract match(context: Context): boolean;
-}
-
 // tslint:disable-next-line: max-classes-per-file
-export class EmptyNGuard extends NGuard {
-  public match(context: Context): boolean {
-    return true;
-  }
-}
-
-// tslint:disable-next-line: max-classes-per-file
-export class ConditionNGuard extends NGuard {
-  constructor(public readonly predicate: NPredicate, expression: NExpression) {
-    super(expression);
-  }
+export class NGuard {
+  constructor(
+    public readonly predicate: NPredicate,
+    public readonly body: NExpression,
+  ) {}
 
   public match(context: Context): boolean {
     return this.predicate.match(context);
@@ -32,7 +20,14 @@ export abstract class NPredicate {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class EqualNPredicate extends NPredicate {
+export class ElseNPredicate extends NPredicate {
+  public match(context: Context): boolean {
+    return true;
+  }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+abstract class VariableNPredicate extends NPredicate {
   constructor(
     public readonly variable: string,
     public readonly value: NConstant,
@@ -48,6 +43,29 @@ export class EqualNPredicate extends NPredicate {
       return false;
     }
 
-    return val === this.value.value;
+    return this.matchWithValue(val);
+  }
+
+  public abstract matchWithValue(value: number): boolean;
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class EqualNPredicate extends VariableNPredicate {
+  public matchWithValue(value: number): boolean {
+    return value === this.value.value;
+  }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class LessNPredicate extends VariableNPredicate {
+  public matchWithValue(value: number): boolean {
+    return value < this.value.value;
+  }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class MoreNPredicate extends VariableNPredicate {
+  public matchWithValue(value: number): boolean {
+    return value > this.value.value;
   }
 }

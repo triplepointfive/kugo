@@ -2,7 +2,13 @@ import { castArray } from "lodash";
 import { KugoError } from "../core/KugoError";
 
 export class Maybe<T> {
-  public static fail<T>(msg: ReadonlyArray<KugoError> | KugoError): Maybe<T> {
+  public static fail<T>(
+    msg: ReadonlyArray<KugoError> | KugoError | string,
+  ): Maybe<T> {
+    if (typeof msg === "string") {
+      return new Maybe<T>({ errors: [new KugoError(msg)] });
+    }
+
     return new Maybe<T>({ errors: castArray(msg) });
   }
 
