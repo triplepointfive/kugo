@@ -63,8 +63,11 @@ describe("guards", () => {
   });
 
   it("more", () => {
-    expectEval(`sign i\n  | i > 5 = 1\nmain = sign 7`, "1");
-    expectEval(`sign i\n  | i > 10 = 1\n  | i > 5 = 2\nmain = sign 7`, "2");
+    // TODO:
+    // expectEval(
+    //   `fac n\n  | n > 1 = prod n (fac (subst n 1))\n  | i == 1 = 1\nmain = fac 5`,
+    //   "120",
+    // );
   });
 });
 
@@ -79,6 +82,13 @@ describe("errors", () => {
     expectEval("\n", NOT_FOUND);
     expectEval("three = 3", NOT_FOUND);
     expectEval("three = two\nmain = three", "Function two is not found");
+  });
+
+  it("guards", () => {
+    expectEval(
+      `fac n\n  | i == 0 = 1\nmain = fac 0`,
+      "Variable i is not found",
+    );
   });
 
   it("typecheck", () => {

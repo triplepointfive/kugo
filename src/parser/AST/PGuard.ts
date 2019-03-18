@@ -1,6 +1,7 @@
 import { IntegerNumberInterval, IntegerNumberType, UnionMetaType } from "../..";
 import { FunctionArgs } from "../../core/AST";
 import { MetaType } from "../../core/Type/Meta";
+import { Maybe } from "../../utils/Maybe";
 import { NumberPExpression } from "./NumberPExpression";
 import { PExpression } from "./PExpression";
 
@@ -21,7 +22,7 @@ export abstract class PPredicateVisitor<T> {
 
 // tslint:disable-next-line: max-classes-per-file
 export abstract class PPredicate {
-  public abstract restrictArgs(args: FunctionArgs): FunctionArgs;
+  public abstract restrictArgs(args: FunctionArgs): Maybe<FunctionArgs>;
   public abstract visit<T>(visitor: PPredicateVisitor<T>): T;
 }
 
@@ -30,8 +31,8 @@ export abstract class PPredicate {
  */
 // tslint:disable-next-line: max-classes-per-file
 export class ElsePPredicate extends PPredicate {
-  public restrictArgs(args: FunctionArgs): FunctionArgs {
-    return args;
+  public restrictArgs(args: FunctionArgs): Maybe<FunctionArgs> {
+    return Maybe.just(args);
   }
 
   public visit<T>(visitor: PPredicateVisitor<T>): T {
@@ -40,7 +41,7 @@ export class ElsePPredicate extends PPredicate {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class EqualPPredicate extends PPredicate {
+abstract class VariableConditionPPredicate extends PPredicate {
   constructor(
     public readonly variable: string,
     public readonly value: NumberPExpression,
@@ -48,14 +49,31 @@ export class EqualPPredicate extends PPredicate {
     super();
   }
 
-  public restrictArgs(args: FunctionArgs): FunctionArgs {
-    return args.map(arg => {
-      if (this.variable === arg.name) {
-        arg.type = arg.type.intersect(this.value.type);
+  public restrictArgs(args: FunctionArgs): Maybe<FunctionArgs> {
+    let found = false;
+    const restrictedArgs = args.map(({ name, type }) => {
+      if (this.variable === name) {
+        found = true;
+        return { name, type: type.intersect(this.subtype) };
       }
 
-      return arg;
+      return { name, type };
     });
+
+    if (found) {
+      return Maybe.just(restrictedArgs);
+    }
+
+    return Maybe.fail(`Variable ${this.variable} is not found`);
+  }
+
+  abstract get subtype(): MetaType;
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class EqualPPredicate extends VariableConditionPPredicate {
+  get subtype(): MetaType {
+    return this.value.type;
   }
 
   public visit<T>(visitor: PPredicateVisitor<T>): T {
@@ -64,29 +82,7 @@ export class EqualPPredicate extends PPredicate {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-abstract class ComparisonPPredicate extends PPredicate {
-  constructor(
-    public readonly variable: string,
-    public readonly value: NumberPExpression,
-  ) {
-    super();
-  }
-
-  public restrictArgs(args: FunctionArgs): FunctionArgs {
-    return args.map(({ name, type }) => {
-      if (this.variable === name) {
-        return { name, type: type.intersect(this.subtype) };
-      }
-
-      return { name, type };
-    });
-  }
-
-  abstract get subtype(): MetaType;
-}
-
-// tslint:disable-next-line: max-classes-per-file
-export class LessPPredicate extends ComparisonPPredicate {
+export class LessPPredicate extends VariableConditionPPredicate {
   get subtype(): MetaType {
     return new UnionMetaType([
       new IntegerNumberType([
@@ -103,7 +99,7 @@ export class LessPPredicate extends ComparisonPPredicate {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class MorePPredicate extends ComparisonPPredicate {
+export class MorePPredicate extends VariableConditionPPredicate {
   get subtype(): MetaType {
     return new UnionMetaType([
       new IntegerNumberType([

@@ -24,31 +24,29 @@ export function buildArgs(
     },
   );
 
-  // TODO: Also check bounds given with guards
-  const args = guard.expression.visit(
-    new FunctionArgsPExpressionVisitor(
-      context,
-      guard.predicate.restrictArgs(initArgs),
-    ),
-  );
-
-  // TODO: Check invalid types better
-  const neverArgs = args.filter(({ type }) => type instanceof NeverMetaType);
-
-  if (neverArgs.length) {
-    return Maybe.fail(
-      neverArgs.map(
-        ({ name, type }) =>
-          new KugoError(
-            `${
-              functionDeclaration.name
-            }: argument ${name} has type ${type.display()}`,
-          ),
-      ),
+  return guard.predicate.restrictArgs(initArgs).map(restrictedArgs => {
+    const args = guard.expression.visit(
+      new FunctionArgsPExpressionVisitor(context, restrictedArgs),
     );
-  }
 
-  return Maybe.just(args);
+    // TODO: Check invalid types better
+    const neverArgs = args.filter(({ type }) => type instanceof NeverMetaType);
+
+    if (neverArgs.length) {
+      return Maybe.fail(
+        neverArgs.map(
+          ({ name, type }) =>
+            new KugoError(
+              `${
+                functionDeclaration.name
+              }: argument ${name} has type ${type.display()}`,
+            ),
+        ),
+      );
+    }
+
+    return Maybe.just(args);
+  });
 }
 
 class FunctionArgsPExpressionVisitor extends PExpressionVisitor<FunctionArgs> {
