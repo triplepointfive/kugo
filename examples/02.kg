@@ -1,6 +1,5 @@
-sign i
-  | i  < 0 = -1
-  | i  > 0 =  1
-  | i == 0 =  0
+fac n
+  | n  > 0 = prod (fac (subst n 1)) n
+  | n == 0 = 1
 
-main = sign (-3)
+main = fac 5

@@ -69,6 +69,18 @@ describe("guards", () => {
     //   "120",
     // );
   });
+
+  it("order", () => {
+    expectEval(
+      `fac n\n  | n  > 0 = prod (fac (subst n 1)) n\n  | n == 0 = 1\nmain = fac 5`,
+      "120",
+    );
+
+    expectEval(
+      `fac n\n  | n == 0 = 1\n  | n  > 0 = prod (fac (subst n 1)) n\nmain = fac 5`,
+      "120",
+    );
+  });
 });
 
 describe("functions", () => {

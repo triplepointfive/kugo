@@ -19,11 +19,15 @@ export class IntegerNumberInterval {
     const bottom =
       this.bottom !== undefined && interval.bottom !== undefined
         ? Math.max(this.bottom, interval.bottom)
-        : this.bottom || interval.bottom;
+        : this.bottom !== undefined
+        ? this.bottom
+        : interval.bottom;
     const upper =
       this.upper !== undefined && interval.upper !== undefined
         ? Math.min(this.upper, interval.upper)
-        : this.upper || interval.upper;
+        : this.upper !== undefined
+        ? this.upper
+        : interval.upper;
 
     if (bottom !== undefined && upper !== undefined && bottom > upper) {
       return undefined;
