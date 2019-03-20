@@ -1,4 +1,4 @@
-import { IntegerNumberInterval, IntegerNumberType, UnionMetaType } from "../..";
+import { IntegerNumberType, UnionMetaType } from "../..";
 import { FunctionArgs } from "../../core/AST";
 import { MetaType } from "../../core/Type/Meta";
 import { Maybe } from "../../utils/Maybe";
@@ -85,11 +85,9 @@ export class EqualPPredicate extends VariableConditionPPredicate {
 export class LessPPredicate extends VariableConditionPPredicate {
   get subtype(): MetaType {
     return new UnionMetaType([
-      new IntegerNumberType([
-        new IntegerNumberInterval({
-          upper: this.value.value,
-        }),
-      ]),
+      new IntegerNumberType({
+        upper: this.value.value,
+      }),
     ]);
   }
 
@@ -102,11 +100,9 @@ export class LessPPredicate extends VariableConditionPPredicate {
 export class MorePPredicate extends VariableConditionPPredicate {
   get subtype(): MetaType {
     return new UnionMetaType([
-      new IntegerNumberType([
-        new IntegerNumberInterval({
-          bottom: this.value.value,
-        }),
-      ]),
+      new IntegerNumberType({
+        bottom: this.value.value,
+      }),
     ]);
   }
 

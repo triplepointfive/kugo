@@ -5,28 +5,20 @@ import {
   FunctionType,
 } from "./core/AST/FunctionAnnotation";
 import { Context } from "./core/Context";
-import { IntegerNumberInterval } from "./core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
-import { Natural0NumberType } from "./core/Type/Integral/Natural0NumberType";
 import { UnionMetaType } from "./core/Type/Meta/UnionMetaType";
 
-export const Z = new UnionMetaType([
-  new IntegerNumberType([new IntegerNumberInterval()]),
-]);
+export const Z = new UnionMetaType([new IntegerNumberType()]);
 
 export const divBody = new BuiltInFunctionAnnotation(
   ["a", "b"],
   [
     new FunctionType(
-      [
-        Z,
-        new UnionMetaType([
-          new IntegerNumberType([
-            new IntegerNumberInterval({ upper: -1 }),
-            new IntegerNumberInterval({ bottom: 1 }),
-          ]),
-        ]),
-      ],
+      [Z, new UnionMetaType([new IntegerNumberType({ upper: -1 })])],
+      Z,
+    ),
+    new FunctionType(
+      [Z, new UnionMetaType([new IntegerNumberType({ bottom: 1 })])],
       Z,
     ),
   ],
@@ -49,7 +41,12 @@ export const prodBody = new BuiltInFunctionAnnotation(
 );
 export const absBody = new BuiltInFunctionAnnotation(
   ["v"],
-  [new FunctionType([Z], new UnionMetaType([new Natural0NumberType()]))],
+  [
+    new FunctionType(
+      [Z],
+      new UnionMetaType([new IntegerNumberType({ bottom: 0 })]),
+    ),
+  ],
   (v: Value) => Math.abs(v),
 );
 

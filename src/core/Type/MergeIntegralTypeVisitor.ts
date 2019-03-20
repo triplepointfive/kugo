@@ -1,33 +1,39 @@
-import { IntegerNumberInterval, IntegerNumberType } from "../..";
+import { IntegerNumberType } from "../..";
 import { BaseTypeVisitor } from "./BaseTypeVisitor";
 
 export class MergeIntegralTypeVisitor extends BaseTypeVisitor<
   IntegerNumberType | undefined
 > {
-  private bounds: IntegerNumberInterval[];
-
-  constructor({ bounds }: IntegerNumberType) {
+  constructor(private type: IntegerNumberType) {
     super();
-    this.bounds = bounds;
   }
 
   // TODO: Add ability to return nothing
   public visitIntegral(type: IntegerNumberType): IntegerNumberType | undefined {
-    const resultSet: IntegerNumberInterval[] = [];
-    type.bounds.forEach(interval1 => {
-      this.bounds.forEach(interval2 => {
-        const intersection = interval1.intersection(interval2);
-        if (intersection) {
-          resultSet.push(intersection);
-        }
-      });
-    });
+    return this.intersection(this.type, type);
+  }
 
-    if (resultSet.length === 0) {
-      return;
+  private intersection(
+    { bottom: b1, upper: u1 }: IntegerNumberType,
+    { bottom: b2, upper: u2 }: IntegerNumberType,
+  ): IntegerNumberType | undefined {
+    const bottom =
+      b1 !== undefined && b2 !== undefined
+        ? Math.max(b1, b2)
+        : b1 !== undefined
+        ? b1
+        : b2;
+    const upper =
+      u1 !== undefined && u2 !== undefined
+        ? Math.min(u1, u2)
+        : u1 !== undefined
+        ? u1
+        : u2;
+
+    if (bottom !== undefined && upper !== undefined && bottom > upper) {
+      return undefined;
     }
 
-    // TODO: Add normalization
-    return new IntegerNumberType(resultSet);
+    return new IntegerNumberType({ bottom, upper });
   }
 }

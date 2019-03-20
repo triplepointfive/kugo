@@ -31,7 +31,7 @@ export class ReturnTypePExpressionVisitor extends PExpressionVisitor<
     // TODO: Filter types with input args
     // TODO: Remove duplicity
     const resultType = reduce(
-      definedFunction.types.map(({ result }) => result),
+      definedFunction.types().map(({ result }) => result),
       (acc, result) => acc.union(result),
     );
 

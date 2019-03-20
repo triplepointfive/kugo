@@ -106,7 +106,7 @@ describe("errors", () => {
   it("typecheck", () => {
     expectEval(
       "main = div 10 0",
-      "div: expected 2 arg of type (-∞, -1] ∪ [1, +∞) but got 0",
+      "div: expected 2 arg of type (-∞, -1] ∪ ℕ but got 0",
     );
     expectEval(
       `sign i\n  | i == 0 = 1\nmain = sign 1`,

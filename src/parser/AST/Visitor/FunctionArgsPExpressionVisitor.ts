@@ -1,3 +1,4 @@
+import { concat, flatMap, reduce, uniqBy } from "lodash";
 import {
   AnyMetaType,
   CallPExpression,
@@ -6,9 +7,7 @@ import {
 } from "../../..";
 import { Arg, FunctionArgs } from "../../../core/AST";
 import { Context } from "../../../core/Context";
-import { KugoError } from "../../../core/KugoError";
 import { MetaType } from "../../../core/Type/Meta";
-import { NeverMetaType } from "../../../core/Type/Meta/NeverMetaType";
 import { Maybe } from "../../../utils/Maybe";
 import { PGuard } from "../PGuard";
 import { PExpressionVisitor } from "./PExpressionVisitor";
@@ -17,7 +16,7 @@ export function buildArgs(
   context: Context,
   functionDeclaration: PFunctionDeclaration,
   guard: PGuard,
-): Maybe<FunctionArgs> {
+): Maybe<FunctionArgs[]> {
   const initArgs = functionDeclaration.args.map(
     (name: string, i: number): Arg => {
       return { name, type: new AnyMetaType(i) };
@@ -30,56 +29,71 @@ export function buildArgs(
     );
 
     // TODO: Check invalid types better
-    const neverArgs = args.filter(({ type }) => type instanceof NeverMetaType);
+    // TODO: Add checks
 
-    if (neverArgs.length) {
-      return Maybe.fail(
-        neverArgs.map(
-          ({ name, type }) =>
-            new KugoError(
-              `${
-                functionDeclaration.name
-              }: argument ${name} has type ${type.display()}`,
-            ),
-        ),
-      );
-    }
-
-    return Maybe.just(args);
+    // TODO: Do it more accurate
+    return Maybe.just(
+      uniqBy(args, arg => arg.map(a => a.type.display()).join(" ")),
+    );
   });
 }
 
-class FunctionArgsPExpressionVisitor extends PExpressionVisitor<FunctionArgs> {
-  private argType?: MetaType;
-
-  constructor(private context: Context, private args: FunctionArgs) {
+class FunctionArgsPExpressionVisitor extends PExpressionVisitor<
+  FunctionArgs[]
+> {
+  constructor(
+    private readonly context: Context,
+    private readonly args: FunctionArgs,
+    private readonly argType?: MetaType,
+  ) {
     super();
   }
 
-  public visitFunctionCall({ name, args }: CallPExpression): FunctionArgs {
-    if (this.argType !== undefined && args.length === 0) {
-      for (const arg of this.args) {
-        if (arg.name === name) {
-          arg.type = arg.type.intersect(this.argType);
-        }
-      }
-    }
+  public visitFunctionCall(call: CallPExpression): FunctionArgs[] {
+    let restrictedArgs: FunctionArgs = this.args;
 
-    const functionDeclaration = this.context.lookupFunction(name);
-    if (functionDeclaration) {
-      args.forEach((arg, index) => {
-        // TODO: Rethink what to do here
-        functionDeclaration.types.forEach(types => {
-          this.argType = types.args[index];
-          arg.visit(this);
-        });
+    if (call.args.length === 0) {
+      restrictedArgs = this.args.map(({ name, type }) => {
+        if (name === call.name && this.argType !== undefined) {
+          return { name, type: type.intersect(this.argType) };
+        }
+
+        return { name, type };
       });
     }
 
-    return this.args;
+    const functionAnnotation = this.context.lookupFunction(call.name);
+
+    if (functionAnnotation === undefined) {
+      return [restrictedArgs];
+    }
+
+    let callTypesArgs: FunctionArgs[] = [];
+
+    functionAnnotation.types().forEach(types => {
+      callTypesArgs = concat(
+        callTypesArgs,
+        reduce(
+          call.args,
+          (opts, arg, index) =>
+            flatMap(opts, opt =>
+              arg.visit(
+                new FunctionArgsPExpressionVisitor(
+                  this.context,
+                  opt,
+                  types.args[index],
+                ),
+              ),
+            ),
+          [restrictedArgs],
+        ),
+      );
+    });
+
+    return callTypesArgs;
   }
 
-  public visitValue(value: NumberPExpression): FunctionArgs {
-    return this.args;
+  public visitValue(value: NumberPExpression): FunctionArgs[] {
+    return [this.args];
   }
 }

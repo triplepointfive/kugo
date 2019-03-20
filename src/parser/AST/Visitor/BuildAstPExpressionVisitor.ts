@@ -1,4 +1,5 @@
 import { NExpression } from "../../../core/AST";
+import { FunctionType } from "../../../core/AST/FunctionAnnotation";
 import { NCall } from "../../../core/AST/NCall";
 import { NConstant } from "../../../core/AST/NConstant";
 import { NGuard } from "../../../core/AST/NGuard";
@@ -35,7 +36,10 @@ export class BuildAstPExpressionVisitor extends PExpressionVisitor<
 
 // tslint:disable-next-line: max-classes-per-file
 export class BuildGuardVisitor {
-  constructor(protected readonly guard: PGuard) {}
+  constructor(
+    protected readonly guard: PGuard,
+    private readonly types: FunctionType[],
+  ) {}
 
   public build(): Maybe<NGuard> {
     return this.guard.expression
@@ -45,6 +49,7 @@ export class BuildGuardVisitor {
           new NGuard(
             this.guard.predicate.visit(new BuildNGuardVisitor()),
             body,
+            this.types,
           ),
         ),
       );

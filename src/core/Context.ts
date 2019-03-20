@@ -1,6 +1,7 @@
 import { concat, reduce } from "lodash";
 import { PApp } from "../parser/AST";
 import { PFunctionDeclaration } from "../parser/AST/PFunctionDeclaration";
+import { PGuard } from "../parser/AST/PGuard";
 import { BuildGuardVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisitor";
 import { buildArgs } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
 import { ReturnTypePExpressionVisitor } from "../parser/AST/Visitor/ReturnTypePExpressionVisitor";
@@ -11,44 +12,52 @@ import { FunctionAnnotation, FunctionType } from "./AST/FunctionAnnotation";
 import { NGuard } from "./AST/NGuard";
 import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
 import { TypeCheckFunctionAnnotationVisitor } from "./AST/Visitor/TypeCheckFunctionAnnotationVisitor";
+import { KugoError } from "./KugoError";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
+
+function buildGuard(
+  ctx: Context,
+  fd: PFunctionDeclaration,
+  guard: PGuard,
+): Maybe<NGuard> {
+  return buildArgs(ctx, fd, guard).map(typeArgs => {
+    const types: FunctionType[] = [];
+    let errors: KugoError[] = [];
+
+    typeArgs.forEach(args =>
+      guard.expression
+        .visit(new ReturnTypePExpressionVisitor(ctx, args))
+        .with(
+          resultType =>
+            types.push(
+              new FunctionType(args.map(({ type }) => type), resultType),
+            ),
+          argErrors => (errors = errors.concat(argErrors)),
+        ),
+    );
+
+    if (errors.length) {
+      return Maybe.fail(errors);
+    }
+
+    return new BuildGuardVisitor(guard, types).build();
+  });
+}
 
 function buildFA(
   ctx: Context,
   fd: PFunctionDeclaration,
 ): Maybe<FunctionAnnotation> {
   return reduce(
-    fd.guards.map(
-      (guard): Maybe<FunctionType> =>
-        buildArgs(ctx, fd, guard).map(args =>
-          guard.expression
-            .visit(new ReturnTypePExpressionVisitor(ctx, args))
-            .map(resultType =>
-              Maybe.just(
-                new FunctionType(args.map(({ type }) => type), resultType),
-              ),
-            ),
-        ),
-    ),
-    (accFunctionTypes: Maybe<FunctionType[]>, functionType) =>
-      functionType.map(ft =>
-        accFunctionTypes.map(fts => Maybe.just(concat(fts, [ft]))),
-      ),
+    fd.guards.map(guard => buildGuard(ctx, fd, guard)),
+    (accBodies: Maybe<NGuard[]>, body) =>
+      body.map(bd => accBodies.map(bodies => Maybe.just(concat(bodies, [bd])))),
     Maybe.just([]),
-  ).map(functionTypes =>
+  ).map(guards =>
     // EXTRA: Check functionTypes length
-    reduce(
-      fd.guards.map(guard => new BuildGuardVisitor(guard).build()),
-      (accBodies: Maybe<NGuard[]>, body) =>
-        body.map(bd =>
-          accBodies.map(bodies => Maybe.just(concat(bodies, [bd]))),
-        ),
-      Maybe.just([]),
-    ).map(bodies =>
-      Maybe.just(new AddedFunctionAnnotation(fd.args, functionTypes, bodies)),
-    ),
+    Maybe.just(new AddedFunctionAnnotation(fd.args, guards)),
   );
 }
 

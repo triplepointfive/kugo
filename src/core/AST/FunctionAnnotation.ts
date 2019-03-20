@@ -22,12 +22,10 @@ export class FunctionType {
 
 // tslint:disable-next-line: max-classes-per-file
 export abstract class FunctionAnnotation {
-  constructor(
-    public readonly args: string[],
-    public readonly types: FunctionType[],
-  ) {}
+  constructor(public readonly args: string[]) {}
 
   public abstract visit<T>(visitor: FunctionAnnotationVisitor<T>): T;
+  public abstract types(): FunctionType[];
 
   public displayType(): string {
     return DisplayMetaTypeVisitor.build(this);

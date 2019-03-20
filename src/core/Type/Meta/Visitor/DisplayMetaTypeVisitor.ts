@@ -7,10 +7,11 @@ import {
 import { MetaTypeVisitor } from "./MetaTypeVisitor";
 
 export class DisplayMetaTypeVisitor extends MetaTypeVisitor<string> {
-  public static build({ types }: FunctionAnnotation): string {
+  public static build(fa: FunctionAnnotation): string {
     const visitor = new DisplayMetaTypeVisitor();
 
-    return types
+    return fa
+      .types()
       .map(({ args, result }) => {
         if (args.length) {
           return `${args

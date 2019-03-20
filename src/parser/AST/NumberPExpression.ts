@@ -1,4 +1,3 @@
-import { IntegerNumberInterval } from "../../core/Type/Integral/IntegerNumberInterval";
 import { IntegerNumberType } from "../../core/Type/Integral/IntegerNumberType";
 import { MetaType } from "../../core/Type/Meta";
 import { UnionMetaType } from "../../core/Type/Meta/UnionMetaType";
@@ -12,12 +11,10 @@ export class NumberPExpression extends PExpression {
     super();
 
     this.type = new UnionMetaType([
-      new IntegerNumberType([
-        new IntegerNumberInterval({
-          bottom: this.value,
-          upper: this.value,
-        }),
-      ]),
+      new IntegerNumberType({
+        bottom: this.value,
+        upper: this.value,
+      }),
     ]);
   }
 

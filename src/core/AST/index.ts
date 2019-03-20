@@ -2,8 +2,8 @@ import { MetaType } from "../Type/Meta";
 import { AstVisitor } from "./Visitor/AstVisitor";
 
 export interface Arg {
-  name: string;
-  type: MetaType;
+  readonly name: string;
+  readonly type: MetaType;
 }
 export type FunctionArgs = Arg[];
 

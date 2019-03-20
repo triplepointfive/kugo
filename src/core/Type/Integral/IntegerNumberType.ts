@@ -1,10 +1,20 @@
 import { BaseTypeVisitor } from "../BaseTypeVisitor";
 import { NumberType } from "../NumberType";
-import { IntegerNumberInterval } from "./IntegerNumberInterval";
 
 export class IntegerNumberType extends NumberType {
-  constructor(public readonly bounds: IntegerNumberInterval[] = []) {
+  public readonly bottom?: number;
+  public readonly upper?: number;
+
+  constructor({
+    bottom,
+    upper,
+  }: {
+    bottom?: number;
+    upper?: number;
+  } = {}) {
     super();
+    this.bottom = bottom;
+    this.upper = upper;
   }
 
   public visit<T>(visitor: BaseTypeVisitor<T>): T {
@@ -12,18 +22,29 @@ export class IntegerNumberType extends NumberType {
   }
 
   public display(): string {
-    // EXTRA: Should never get here
-    if (this.bounds.length === 0) {
-      return "ℤ";
+    if (this.upper === undefined) {
+      switch (this.bottom) {
+        case undefined:
+          return "ℤ";
+        case 0:
+          return "ℕ0";
+        case 1:
+          return "ℕ";
+        default:
+          return `${this.displayBottom()}, +∞)`;
+      }
     }
 
-    if (
-      this.bounds[0].bottom === undefined &&
-      this.bounds[0].upper === undefined
-    ) {
-      return "ℤ";
+    if (this.bottom !== undefined && this.bottom === this.upper) {
+      return `${this.bottom}`;
     }
 
-    return this.bounds.map(b => b.display()).join(" ∪ ");
+    return `${this.displayBottom()}, ${this.upper}]`;
+  }
+
+  private displayBottom(): string {
+    return `${this.bottom !== undefined ? "[" : "("}${
+      this.bottom !== undefined ? this.bottom : "-∞"
+    }`;
   }
 }

@@ -5,13 +5,17 @@ import { FunctionAnnotationVisitor } from "./Visitor/FunctionAnnotationVisitor";
 export class BuiltInFunctionAnnotation extends FunctionAnnotation {
   constructor(
     args: string[],
-    types: FunctionType[],
+    private readonly functionTypes: FunctionType[],
     public readonly body: (...args: any) => Value,
   ) {
-    super(args, types);
+    super(args);
   }
 
   public visit<T>(visitor: FunctionAnnotationVisitor<T>): T {
     return visitor.visitBuiltIn(this);
+  }
+
+  public types(): FunctionType[] {
+    return this.functionTypes;
   }
 }

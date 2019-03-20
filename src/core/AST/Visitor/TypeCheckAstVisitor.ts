@@ -62,7 +62,7 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
     fa: FunctionAnnotation,
     inputArgs: MetaType[],
   ): Maybe<MetaType> {
-    let matchingFunctionTypes = fa.types;
+    let matchingFunctionTypes = fa.types();
 
     for (const [i, actualType] of inputArgs.entries()) {
       const filteredTypes = matchingFunctionTypes.filter(({ args }) =>
@@ -87,7 +87,8 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
     }
 
     const resultType = reduce(
-      fa.types
+      fa
+        .types()
         .filter(type => type.matchArgs(inputArgs))
         .map(({ result }) => result),
       (acc, result) => acc.union(result),

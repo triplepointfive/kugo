@@ -1,3 +1,4 @@
+import { flatMap } from "lodash";
 import { foldl1 } from "../../../utils";
 import { Maybe } from "../../../utils/Maybe";
 import { Context } from "../../Context";
@@ -37,16 +38,16 @@ export class TypeCheckFunctionAnnotationVisitor extends FunctionAnnotationVisito
   }
 
   public visitAdded(fa: AddedFunctionAnnotation): Maybe<undefined> {
-    // TODO: Apply guard type restrictions here
     return foldl1(
-      fa.guards.map(({ body }, i) =>
-        body.visit(
-          new TypeCheckAstVisitor(
-            this.context,
-            fa.args.map((name, j) => {
-              // TODO: This is so incorrect
-              return { name, type: fa.types[0].args[j] };
-            }),
+      flatMap(fa.guards, ({ body, types }) =>
+        types.map(type =>
+          body.visit(
+            new TypeCheckAstVisitor(
+              this.context,
+              fa.args.map((name, j) => {
+                return { name, type: type.args[j] };
+              }),
+            ),
           ),
         ),
       ),

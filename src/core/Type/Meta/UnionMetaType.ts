@@ -1,3 +1,4 @@
+import { concat, uniqBy } from "lodash";
 import { MetaType } from ".";
 import { BaseType } from "../BaseType";
 import { MergeBaseTypeVisitor } from "../MergeBaseTypeVisitor";
@@ -10,8 +11,14 @@ export class UnionMetaType extends MetaType {
   }
 
   public union(type: MetaType): MetaType {
-    // TODO
-    return this;
+    // EXTRA: Make it better
+    if (type instanceof UnionMetaType) {
+      return new UnionMetaType(
+        uniqBy(concat(this.options, type.options), arg => arg.display()),
+      );
+    }
+
+    return type.union(this);
   }
 
   public intersect(type: MetaType): MetaType {

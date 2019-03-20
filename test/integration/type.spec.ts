@@ -31,7 +31,7 @@ const expectEval = (
 
 it("integer", () => {
   expectEval("main = -3", "-3");
-  expectEval("main a b = div a b", "ℤ → (-∞, -1] ∪ [1, +∞) → ℤ");
+  expectEval("main a b = div a b", "ℤ → (-∞, -1] → ℤ | ℤ → ℕ → ℤ");
   expectEval("main a b = prod (sum a b) b", "ℤ → ℤ → ℤ");
 });
 
@@ -45,5 +45,5 @@ it("guard", () => {
   expectEval(`main i\n  | i == 0 = 1\n  | i == 1 = 2\n`, "0 → 1 | 1 → 2");
 
   expectEval(`main i j\n  | i == 0 = 1\n`, "0 → a → 1");
-  expectEval(`main j i\n  | i > 0 = 1\n`, "a → [0, +∞) → 1"); // TODO: display as N0
+  expectEval(`main j i\n  | i > 0 = 1\n`, "a → ℕ0 → 1");
 });
