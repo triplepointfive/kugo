@@ -40,6 +40,7 @@ export class EvalFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
       return guard.body.visit(new EvalAstVisitor(this.context));
     }
 
+    console.log(fa, this.context);
     return Maybe.fail(new KugoError(`Guard lookup failed`));
   }
 }

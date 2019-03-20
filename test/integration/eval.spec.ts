@@ -63,11 +63,10 @@ describe("guards", () => {
   });
 
   it("more", () => {
-    // TODO:
-    // expectEval(
-    //   `fac n\n  | n > 1 = prod n (fac (subst n 1))\n  | i == 1 = 1\nmain = fac 5`,
-    //   "120",
-    // );
+    expectEval(
+      `fac n\n  | n > 1 = prod n (fac (subst n 1))\n  | n == 1 = 1\nmain = fac 5`,
+      "120",
+    );
   });
 
   it("order", () => {
@@ -80,6 +79,24 @@ describe("guards", () => {
       `fac n\n  | n == 0 = 1\n  | n  > 0 = prod (fac (subst n 1)) n\nmain = fac 5`,
       "120",
     );
+  });
+
+  describe("recursion", () => {
+    it("single branch", () => {
+      // EXTRA: Remove abs
+      // EXTRA: should work for inc 0
+      expectEval(
+        `inc i\n  | i == 10 = i\n  | i > 0 = inc (abs (sum i 1))\nmain = inc 1`,
+        "10",
+      );
+    });
+
+    it("multiple branches", () => {
+      expectEval(
+        `inc i\n  | i == 11 = 12\n  | i == 10 = i\n  | i > 0 = inc (abs (sum i 1))\nmain = inc 1`,
+        "10",
+      );
+    });
   });
 });
 
@@ -103,6 +120,18 @@ describe("errors", () => {
     );
   });
 
+  it("recursive", () => {
+    expectEval(
+      `fac n\n  | n == 0 = fac 0\nmain = fac 0`,
+      "Cannot build infinity type for fac",
+    );
+
+    expectEval(
+      `fac n\n  | n == 0 = 0\n  | i == 1 = fac 2\nmain = fac 3`,
+      "Variable i is not found",
+    );
+  });
+
   it("typecheck", () => {
     expectEval(
       "main = div 10 0",
@@ -113,5 +142,6 @@ describe("errors", () => {
       "sign: expected 1 arg of type 0 but got 1",
     );
     // TODO: expectEval(`sign i\n  | i < 5 = 1\n  | i < 10 = 2\nmain = sign 12`, "2");
+    // TODO: sm i = sm (sum i 1)
   });
 });

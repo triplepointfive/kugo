@@ -1,5 +1,5 @@
-sign i
-  | i == 5 = 120
-  | i == 0 =   1
+inc i
+  | i == 1000 = i
+  | i >     0 = inc (abs (sum i 1))
 
-main = sign 0
+main = inc 1

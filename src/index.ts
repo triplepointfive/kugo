@@ -4,6 +4,7 @@ export * from "./core/AST/FunctionAnnotation";
 export * from "./core/AST/NCall";
 export * from "./core/AST/NConstant";
 export * from "./core/AST/NGuard";
+export * from "./core/AST/NPredicate";
 export * from "./core/AST/Visitor/AstVisitor";
 export * from "./core/AST/Visitor/EvalAstVisitor";
 export * from "./core/AST/Visitor/EvalFunctionAnnotationVisitor";

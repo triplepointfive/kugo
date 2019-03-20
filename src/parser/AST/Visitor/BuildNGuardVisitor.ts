@@ -5,7 +5,7 @@ import {
   LessNPredicate,
   MoreNPredicate,
   NPredicate,
-} from "../../../core/AST/NGuard";
+} from "../../../core/AST/NPredicate";
 import {
   ElsePPredicate,
   EqualPPredicate,
