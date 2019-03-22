@@ -1,4 +1,4 @@
-import { Value } from "./core/AST";
+import { EvaluatedValue, Value } from "./core/AST";
 import { BuiltInFunctionAnnotation } from "./core/AST/BuiltInFunctionAnnotation";
 import {
   FunctionAnnotation,
@@ -9,6 +9,22 @@ import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
 import { UnionMetaType } from "./core/Type/Meta/UnionMetaType";
 
 export const Z = new UnionMetaType([new IntegerNumberType()]);
+
+const evalV = (
+  f: (...args: EvaluatedValue[]) => EvaluatedValue,
+): ((...args: Value[]) => Value) => {
+  return (...args: Value[]): Value => {
+    const evaluatedArgs: EvaluatedValue[] = args.map(arg => {
+      const value = arg;
+
+      // TODO: while (value.kind !== "eval") {}
+
+      return value.value;
+    });
+
+    return { kind: "eval", value: f(...evaluatedArgs) };
+  };
+};
 
 export const divBody = new BuiltInFunctionAnnotation(
   ["a", "b"],
@@ -22,23 +38,27 @@ export const divBody = new BuiltInFunctionAnnotation(
       Z,
     ),
   ],
-  (a: Value, b: Value) => Math.floor(a / b),
+  evalV((a: EvaluatedValue, b: EvaluatedValue) => Math.floor(a / b)),
 );
+
 export const substBody = new BuiltInFunctionAnnotation(
   ["a", "b"],
   [new FunctionType([Z, Z], Z)],
-  (a: Value, b: Value) => a - b,
+  evalV((a: EvaluatedValue, b: EvaluatedValue) => a - b),
 );
+
 export const sumBody = new BuiltInFunctionAnnotation(
   ["a", "b"],
   [new FunctionType([Z, Z], Z)],
-  (a: Value, b: Value) => a + b,
+  evalV((a: EvaluatedValue, b: EvaluatedValue) => a + b),
 );
+
 export const prodBody = new BuiltInFunctionAnnotation(
   ["a", "b"],
   [new FunctionType([Z, Z], Z)],
-  (a: Value, b: Value) => a * b,
+  evalV((a: EvaluatedValue, b: EvaluatedValue) => a * b),
 );
+
 export const absBody = new BuiltInFunctionAnnotation(
   ["v"],
   [
@@ -47,7 +67,7 @@ export const absBody = new BuiltInFunctionAnnotation(
       new UnionMetaType([new IntegerNumberType({ bottom: 0 })]),
     ),
   ],
-  (v: Value) => Math.abs(v),
+  evalV((v: EvaluatedValue) => Math.abs(v)),
 );
 
 export const builtInFunctions: Map<string, FunctionAnnotation> = new Map([

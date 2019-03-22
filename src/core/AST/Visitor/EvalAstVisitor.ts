@@ -34,6 +34,6 @@ export class EvalAstVisitor extends AstVisitor<Maybe<Value>> {
   }
 
   public visitConstant({ value }: NConstant): Maybe<Value> {
-    return Maybe.just(value);
+    return Maybe.just<Value>({ kind: "eval", value });
   }
 }

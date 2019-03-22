@@ -7,7 +7,17 @@ export interface Arg {
 }
 export type FunctionArgs = Arg[];
 
-export type Value = number;
+export interface Value {
+  kind: "eval";
+  value: EvaluatedValue;
+}
+
+export const evaluate = (value: Value): EvaluatedValue => {
+  return value.value;
+};
+
+export type DeferredValue = () => Value;
+export type EvaluatedValue = number;
 
 export abstract class NExpression {
   public abstract visit<T>(visitor: AstVisitor<T>): T;

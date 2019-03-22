@@ -6,7 +6,7 @@ export class BuiltInFunctionAnnotation extends FunctionAnnotation {
   constructor(
     args: string[],
     private readonly functionTypes: FunctionType[],
-    public readonly body: (...args: any) => Value,
+    public readonly body: (...args: Value[]) => Value,
   ) {
     super(args);
   }

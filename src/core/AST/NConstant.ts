@@ -1,10 +1,13 @@
-import { NExpression, Value } from ".";
+import { EvaluatedValue, NExpression } from ".";
 import { MetaType } from "../Type/Meta";
 import { AstVisitor } from "./Visitor/AstVisitor";
 
 export class NConstant extends NExpression {
   // TODO: Check whether type is required here
-  constructor(public readonly value: Value, public readonly type: MetaType) {
+  constructor(
+    public readonly value: EvaluatedValue,
+    public readonly type: MetaType,
+  ) {
     super();
   }
 

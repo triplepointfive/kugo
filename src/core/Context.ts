@@ -166,6 +166,7 @@ export class Context {
   }
 
   public lookupLocal(name: string): Value | undefined {
+    // TODO: Evaluate deferred value in predicates and replace it in context
     return this.local.get(name);
   }
 }

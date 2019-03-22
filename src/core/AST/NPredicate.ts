@@ -29,7 +29,7 @@ abstract class VariableNPredicate extends NPredicate {
       return false;
     }
 
-    return this.matchWithValue(val);
+    return this.matchWithValue(val.value);
   }
 
   public abstract matchWithValue(value: number): boolean;

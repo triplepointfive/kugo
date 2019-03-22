@@ -1,10 +1,16 @@
-import { builtInContext, KugoError, parseKugoFile } from "../../src";
+import {
+  builtInContext,
+  evaluate,
+  KugoError,
+  parseKugoFile,
+  Value,
+} from "../../src";
 import { Maybe } from "../../src/utils/Maybe";
 
 const NOT_FOUND = "Function main is not found";
 
 const evalExp = (file: string) => {
-  const evalCtx = parseKugoFile(file).map(({ ast }) => {
+  const evalCtx: Maybe<Value> = parseKugoFile(file).map(({ ast }) => {
     const buildCtx = builtInContext.extend(ast);
 
     return buildCtx.map(ctx => {
@@ -19,8 +25,8 @@ const evalExp = (file: string) => {
 
   if (evalCtx.failed) {
     return evalCtx.errors.map(err => err.message).join("\n");
-  } else {
-    return `${evalCtx.value}`;
+  } else if (evalCtx.value !== undefined) {
+    return `${evaluate(evalCtx.value)}`;
   }
 };
 
