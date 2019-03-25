@@ -1,15 +1,13 @@
 import { Value } from "..";
-import { KugoError } from "../../..";
-import { Maybe } from "../../../utils/Maybe";
 import { AddedFunctionAnnotation } from "../AddedFunctionAnnotation";
 import { BuiltInFunctionAnnotation } from "../BuiltInFunctionAnnotation";
 import { EvalAstVisitor } from "./EvalAstVisitor";
 import { FunctionAnnotationVisitor } from "./FunctionAnnotationVisitor";
 
 export class EvalFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
-  Maybe<Value>
+  Value
 > {
-  public visitBuiltIn(fa: BuiltInFunctionAnnotation): Maybe<Value> {
+  public visitBuiltIn(fa: BuiltInFunctionAnnotation): Value {
     const missed: string[] = [];
     const values: Value[] = [];
 
@@ -24,23 +22,21 @@ export class EvalFunctionAnnotationVisitor extends FunctionAnnotationVisitor<
     });
 
     if (missed.length) {
-      return Maybe.fail(
-        missed.map(name => new KugoError(`Function ${name} not found`)),
+      throw new Error(
+        missed.map(name => `Function ${name} not found`).join("\n"),
       );
     }
 
-    return Maybe.just(fa.body(...values));
+    return fa.body(this.context, ...values);
   }
 
-  public visitAdded(fa: AddedFunctionAnnotation): Maybe<Value> {
-    // TODO: Lookup for matching guard
+  public visitAdded(fa: AddedFunctionAnnotation): Value {
     const guard = fa.guards.find(g => g.match(this.context));
 
     if (guard !== undefined) {
       return guard.body.visit(new EvalAstVisitor(this.context));
     }
 
-    console.log(fa, this.context);
-    return Maybe.fail(new KugoError(`Guard lookup failed`));
+    throw new Error(`Guard lookup failed`);
   }
 }

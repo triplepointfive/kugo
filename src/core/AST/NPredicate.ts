@@ -1,3 +1,4 @@
+import { evaluate } from ".";
 import { Context } from "../Context";
 import { NConstant } from "./NConstant";
 
@@ -29,7 +30,7 @@ abstract class VariableNPredicate extends NPredicate {
       return false;
     }
 
-    return this.matchWithValue(val.value);
+    return this.matchWithValue(evaluate(context, val));
   }
 
   public abstract matchWithValue(value: number): boolean;

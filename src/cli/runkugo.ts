@@ -19,7 +19,7 @@ if (files.length === 1) {
     return buildCtx.map(ctx => {
       const main = ctx.lookupFunction("main");
       if (main) {
-        return ctx.evalFunction(main);
+        return Maybe.just(ctx.evalFunction(main));
       } else {
         return Maybe.fail(new KugoError("Function main is not found"));
       }

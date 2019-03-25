@@ -7,33 +7,32 @@ import { NConstant } from "../NConstant";
 import { AstVisitor } from "./AstVisitor";
 import { EvalFunctionAnnotationVisitor } from "./EvalFunctionAnnotationVisitor";
 
-export class EvalAstVisitor extends AstVisitor<Maybe<Value>> {
-  public visitInvocation({ name, args }: NCall): Maybe<Value> {
+export class EvalAstVisitor extends AstVisitor<Value> {
+  public visitInvocation({ name, args }: NCall): Value {
     const local = this.context.lookupLocal(name);
     if (local) {
-      return Maybe.just(local);
+      return local;
     }
 
     const functionAnnotation = this.context.lookupFunction(name);
     if (functionAnnotation === undefined) {
-      return Maybe.fail(new KugoError(`Unknown function ${name}`));
+      throw new Error(`Unknown function ${name}`);
     }
 
     const builtArgs: ArgsTable = new Map();
     for (const [i, arg] of args.entries()) {
-      const result = arg.visit(this);
-      if (result.failed) {
-        return Maybe.fail(result.errors);
-      }
-      result.with(val => builtArgs.set(functionAnnotation.args[i], val));
+      const val = arg.visit(this);
+      builtArgs.set(functionAnnotation.args[i], val);
     }
 
-    return functionAnnotation.visit(
-      new EvalFunctionAnnotationVisitor(this.context.nest(builtArgs)),
-    );
+    return {
+      args: builtArgs,
+      fa: functionAnnotation,
+      kind: "defer",
+    };
   }
 
-  public visitConstant({ value }: NConstant): Maybe<Value> {
-    return Maybe.just<Value>({ kind: "eval", value });
+  public visitConstant({ value }: NConstant): Value {
+    return { kind: "eval", value };
   }
 }

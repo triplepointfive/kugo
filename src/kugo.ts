@@ -1,4 +1,4 @@
-import { EvaluatedValue, Value } from "./core/AST";
+import { evaluate, EvaluatedValue, Value } from "./core/AST";
 import { BuiltInFunctionAnnotation } from "./core/AST/BuiltInFunctionAnnotation";
 import {
   FunctionAnnotation,
@@ -13,18 +13,11 @@ export const Z = new UnionMetaType([new IntegerNumberType()]);
 
 const evalV = (
   f: (...args: EvaluatedValue[]) => EvaluatedValue,
-): ((...args: Value[]) => Value) => {
-  return (...args: Value[]): Value => {
-    const evaluatedArgs: EvaluatedValue[] = args.map(arg => {
-      const value = arg;
-
-      // TODO: while (value.kind !== "eval") {}
-
-      return value.value;
-    });
-
-    return { kind: "eval", value: f(...evaluatedArgs) };
-  };
+): ((ctx: Context, ...args: Value[]) => Value) => (
+  ctx: Context,
+  ...args: Value[]
+): Value => {
+  return { kind: "eval", value: f(...args.map(arg => evaluate(ctx, arg))) };
 };
 
 export const divBody = new BuiltInFunctionAnnotation(
@@ -52,6 +45,7 @@ export const sumBody = new BuiltInFunctionAnnotation(
   ["a", "b"],
   [new FunctionType([Z, Z], Z)],
   evalV((a: EvaluatedValue, b: EvaluatedValue) => a + b),
+  "sum",
 );
 
 export const prodBody = new BuiltInFunctionAnnotation(
@@ -69,6 +63,7 @@ export const absBody = new BuiltInFunctionAnnotation(
     ),
   ],
   evalV((v: EvaluatedValue) => Math.abs(v)),
+  "abs",
 );
 
 export const failBody = new BuiltInFunctionAnnotation(

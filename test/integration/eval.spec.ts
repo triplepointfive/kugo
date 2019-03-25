@@ -1,22 +1,21 @@
 import {
   builtInContext,
-  evaluate,
+  EvaluatedValue,
   KugoError,
   parseKugoFile,
-  Value,
 } from "../../src";
 import { Maybe } from "../../src/utils/Maybe";
 
 const NOT_FOUND = "Function main is not found";
 
 const evalExp = (file: string) => {
-  const evalCtx: Maybe<Value> = parseKugoFile(file).map(({ ast }) => {
+  const evalCtx: Maybe<EvaluatedValue> = parseKugoFile(file).map(({ ast }) => {
     const buildCtx = builtInContext.extend(ast);
 
     return buildCtx.map(ctx => {
       const main = ctx.lookupFunction("main");
       if (main) {
-        return ctx.evalFunction(main);
+        return Maybe.just(ctx.evalFunction(main));
       } else {
         return Maybe.fail(new KugoError(NOT_FOUND));
       }
@@ -26,7 +25,7 @@ const evalExp = (file: string) => {
   if (evalCtx.failed) {
     return evalCtx.errors.map(err => err.message).join("\n");
   } else if (evalCtx.value !== undefined) {
-    return `${evaluate(evalCtx.value)}`;
+    return `${evalCtx.value}`;
   }
 };
 
@@ -113,6 +112,13 @@ describe("guards", () => {
 describe("functions", () => {
   it("args", () => {
     expectEval("const a b = a\nmain = const 1 3", "1");
+  });
+
+  it("tail recursion", () => {
+    expectEval(
+      `inc i\n  | i == 10000 = i\n  | i >      0 = inc (abs (sum i 1))\n\nmain = inc 1`,
+      "10000",
+    );
   });
 });
 

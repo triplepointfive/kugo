@@ -7,17 +7,17 @@ import { BuildGuardVisitor } from "../parser/AST/Visitor/BuildAstPExpressionVisi
 import { buildArgs } from "../parser/AST/Visitor/FunctionArgsPExpressionVisitor";
 import { ReturnTypePExpressionVisitor } from "../parser/AST/Visitor/ReturnTypePExpressionVisitor";
 import { Maybe } from "../utils/Maybe";
-import { Value } from "./AST";
+import { evaluate, EvaluatedValue, Value } from "./AST";
 import { AddedFunctionAnnotation } from "./AST/AddedFunctionAnnotation";
 import { FunctionAnnotation, FunctionType } from "./AST/FunctionAnnotation";
 import { NGuard } from "./AST/NGuard";
-import { EvalFunctionAnnotationVisitor } from "./AST/Visitor/EvalFunctionAnnotationVisitor";
 import { TypeCheckFunctionAnnotationVisitor } from "./AST/Visitor/TypeCheckFunctionAnnotationVisitor";
 import { KugoError } from "./KugoError";
 import { MetaType } from "./Type/Meta";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
+interface EvalValue { kind: "eval"; value: EvaluatedValue }
 
 function buildGuard(
   ctx: Context,
@@ -126,6 +126,8 @@ function buildFA(
 }
 
 export class Context {
+  private localEvaluated: Map<string, EvalValue> = new Map();
+
   constructor(
     public readonly global: FunctionsTable,
     public readonly local: ArgsTable,
@@ -153,8 +155,12 @@ export class Context {
     return Maybe.just(ctx);
   }
 
-  public evalFunction(functionAnnotation: FunctionAnnotation): Maybe<Value> {
-    return functionAnnotation.visit(new EvalFunctionAnnotationVisitor(this));
+  public evalFunction(functionAnnotation: FunctionAnnotation): EvaluatedValue {
+    return evaluate(this, {
+      args: new Map(),
+      fa: functionAnnotation,
+      kind: "defer",
+    });
   }
 
   public nest(local: ArgsTable): Context {
@@ -166,7 +172,22 @@ export class Context {
   }
 
   public lookupLocal(name: string): Value | undefined {
-    // TODO: Evaluate deferred value in predicates and replace it in context
-    return this.local.get(name);
+    const localEval = this.localEvaluated.get(name);
+
+    if (localEval !== undefined) {
+      return localEval;
+    }
+
+    const localVariable = this.local.get(name);
+
+    if (localVariable !== undefined) {
+      const evalValue: EvalValue = {
+        kind: "eval",
+        value: evaluate(this, localVariable),
+      };
+      this.localEvaluated.set(name, evalValue);
+
+      return evalValue;
+    }
   }
 }
