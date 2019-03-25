@@ -6,6 +6,7 @@ import {
 } from "./core/AST/FunctionAnnotation";
 import { Context } from "./core/Context";
 import { IntegerNumberType } from "./core/Type/Integral/IntegerNumberType";
+import { AnyMetaType } from "./core/Type/Meta/AnyMetaType";
 import { UnionMetaType } from "./core/Type/Meta/UnionMetaType";
 
 export const Z = new UnionMetaType([new IntegerNumberType()]);
@@ -70,12 +71,21 @@ export const absBody = new BuiltInFunctionAnnotation(
   evalV((v: EvaluatedValue) => Math.abs(v)),
 );
 
+export const failBody = new BuiltInFunctionAnnotation(
+  ["a"],
+  [new FunctionType([new AnyMetaType(0)], new AnyMetaType(1))],
+  () => {
+    throw new Error("Fail");
+  },
+);
+
 export const builtInFunctions: Map<string, FunctionAnnotation> = new Map([
   ["sum", sumBody],
   ["prod", prodBody],
   ["subst", substBody],
   ["div", divBody],
   ["abs", absBody],
+  ["fail", failBody],
 ]);
 
 export const builtInContext = new Context(builtInFunctions, new Map());

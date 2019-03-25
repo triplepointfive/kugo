@@ -54,6 +54,10 @@ describe("built in", () => {
     expectEval("main = sum 10 2", "12");
     expectEval("main = subst 10 2", "8");
     expectEval("main = prod 10 2", "20");
+
+    expect(() => {
+      expectEval("main = fail 0", "fail");
+    }).toThrowError();
   });
 });
 
