@@ -1,4 +1,4 @@
-import { reduce } from "lodash";
+import { concat, reduce } from "lodash";
 import { FunctionArgs } from "..";
 import { FunctionAnnotation, KugoError } from "../../..";
 import { Maybe } from "../../../utils/Maybe";
@@ -38,7 +38,7 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
     { name, args }: NCall,
     fa: FunctionAnnotation,
   ): Maybe<MetaType> {
-    const errors: KugoError[] = [];
+    let errors: KugoError[] = [];
     const builtArgs: MetaType[] = [];
 
     for (const arg of args) {
@@ -46,7 +46,9 @@ export class TypeCheckAstVisitor extends AstVisitor<Maybe<MetaType>> {
 
       checkResult.with(
         expressionType => builtArgs.push(expressionType),
-        checkErrors => errors.concat(checkErrors),
+        checkErrors => {
+          errors = concat(errors, checkErrors);
+        },
       );
     }
 

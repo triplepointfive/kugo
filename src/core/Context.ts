@@ -17,7 +17,10 @@ import { MetaType } from "./Type/Meta";
 
 export type FunctionsTable = Map<string, FunctionAnnotation>;
 export type ArgsTable = Map<string, Value>;
-interface EvalValue { kind: "eval"; value: EvaluatedValue }
+interface EvalValue {
+  kind: "eval";
+  value: EvaluatedValue;
+}
 
 function buildGuard(
   ctx: Context,
